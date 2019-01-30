@@ -1,0 +1,21 @@
+# Oscilliscope
+# 2018-11-26 22:27:54Z
+
+# IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 0
+# IO_1@[IOP=(1)][IoId=(1)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 1
+# IO_3@[IOP=(1)][IoId=(3)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 3
+set_io "probe1(0)" iocell 3 0
+set_io "probe2(0)" iocell 3 1
+set_io "\USBFS:Dm(0)\" iocell 15 7
+set_io "\USBFS:Dp(0)\" iocell 15 6
+set_io "\ADC_SAR_1:Bypass(0)\" iocell 0 4
+set_io "potChannel1(0)" iocell 2 3
+set_io "potChannel2(0)" iocell 2 6
+set_io "\ADC_SAR_2:Bypass(0)\" iocell 0 2
+set_location "\USBFS:USB\" usbcell -1 -1 0
+set_location "\ADC_SAR_1:ADC_SAR\" sarcell -1 -1 0
+set_location "\ADC_DelSig:DSM\" dsmodcell -1 -1 0
+set_location "\ADC_SAR_2:ADC_SAR\" sarcell -1 -1 1

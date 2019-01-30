@@ -1,0 +1,5 @@
+C:\Users\Nelson\Desktop\121 labs\CMPE121 Lab Project\Oscilloscope\PSOC\Oscilliscope.cydsn\Oscilliscope.cyprj|b0fbb40e-e7f2-406c-a9e6-4644d285c470
+C:\Program Files (x86)\Cypress\PSoC Creator\4.0\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|7f43913c-73fb-4a0d-b181-be702dd1e289
+C:\Program Files (x86)\Cypress\PSoC Creator\4.0\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|95047c61-00b6-4673-a87b-b177c9811661
+C:\Program Files (x86)\Cypress\PSoC Creator\4.0\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|10d85423-9780-46c9-855a-06e086544d06
+C:\Program Files (x86)\Cypress\PSoC Creator\4.0\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|5cd6da80-421f-4ff3-a2ff-cd398ca2ca3f

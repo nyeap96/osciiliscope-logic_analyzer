@@ -1,0 +1,2960 @@
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"main.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.ADCDMAISR1,"ax",%progbits
+  19              		.align	2
+  20              		.global	ADCDMAISR1
+  21              		.thumb
+  22              		.thumb_func
+  23              		.type	ADCDMAISR1, %function
+  24              	ADCDMAISR1:
+  25              	.LFB63:
+  26              		.file 1 "main.c"
+   1:main.c        **** /* ========================================
+   2:main.c        ****  *
+   3:main.c        ****  * Copyright YOUR COMPANY, THE YEAR
+   4:main.c        ****  * All Rights Reserved
+   5:main.c        ****  * UNPUBLISHED, LICENSED SOFTWARE.
+   6:main.c        ****  *
+   7:main.c        ****  * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8:main.c        ****  * WHICH IS THE PROPERTY OF your company.
+   9:main.c        ****  *
+  10:main.c        ****  * ========================================
+  11:main.c        **** */
+  12:main.c        **** #include "project.h"
+  13:main.c        **** 
+  14:main.c        **** uint8 source [2][2][64];            // ping pong buffer arrays
+  15:main.c        **** int probe1TXTD = 0;                 // ping pong selector for channel 1 data
+  16:main.c        **** int probe2TXTD = 0;                 // ping pong selector for channel 1 data
+  17:main.c        **** uint8 pot1Value[1];
+  18:main.c        **** uint8 pot2Value[1];
+  19:main.c        **** 
+  20:main.c        **** 
+  21:main.c        **** 
+  22:main.c        **** CY_ISR(ADCDMAISR1)
+  23:main.c        **** {
+  27              		.loc 1 23 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31 0000 08B5     		push	{r3, lr}
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 3, -8
+  34              		.cfi_offset 14, -4
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 2
+
+
+  24:main.c        ****     if (USBFS_GetEPState(1) == USBFS_IN_BUFFER_EMPTY)           // send data if the buffer is empty
+  35              		.loc 1 24 0
+  36 0002 0120     		movs	r0, #1
+  37 0004 FFF7FEFF 		bl	USBFS_GetEPState
+  38              	.LVL0:
+  39 0008 0128     		cmp	r0, #1
+  40 000a 07D1     		bne	.L2
+  25:main.c        ****     {
+  26:main.c        ****         USBFS_LoadInEP(1,source[0][probe1TXTD],64);
+  41              		.loc 1 26 0
+  42 000c 114B     		ldr	r3, .L6
+  43 000e 1968     		ldr	r1, [r3]
+  44 0010 114B     		ldr	r3, .L6+4
+  45 0012 03EB8111 		add	r1, r3, r1, lsl #6
+  46 0016 4022     		movs	r2, #64
+  47 0018 FFF7FEFF 		bl	USBFS_LoadInEP
+  48              	.LVL1:
+  49              	.L2:
+  27:main.c        ****     }   
+  28:main.c        ****     probe1TXTD = 1 - probe1TXTD;            // switch buffer to send from
+  50              		.loc 1 28 0
+  51 001c 0D4A     		ldr	r2, .L6
+  52 001e 1368     		ldr	r3, [r2]
+  53 0020 C3F10103 		rsb	r3, r3, #1
+  54 0024 1360     		str	r3, [r2]
+  29:main.c        ****     
+  30:main.c        ****     potSelect_Select(0);            // select channel 1 pot
+  55              		.loc 1 30 0
+  56 0026 0020     		movs	r0, #0
+  57 0028 FFF7FEFF 		bl	potSelect_Select
+  58              	.LVL2:
+  31:main.c        ****     pot1Value[0] = ADC_DelSig_Read16();
+  59              		.loc 1 31 0
+  60 002c FFF7FEFF 		bl	ADC_DelSig_Read16
+  61              	.LVL3:
+  62 0030 C0B2     		uxtb	r0, r0
+  63 0032 0A4B     		ldr	r3, .L6+8
+  64 0034 1870     		strb	r0, [r3]
+  32:main.c        ****     if (pot1Value[0] >= 255)
+  65              		.loc 1 32 0
+  66 0036 FF28     		cmp	r0, #255
+  67 0038 01D1     		bne	.L3
+  33:main.c        ****     {
+  34:main.c        ****         pot1Value[0] = 255;
+  68              		.loc 1 34 0
+  69 003a FF22     		movs	r2, #255
+  70 003c 1A70     		strb	r2, [r3]
+  71              	.L3:
+  35:main.c        ****     }
+  36:main.c        ****     else if (pot1Value[0] < 0)
+  37:main.c        ****     {
+  38:main.c        ****         pot1Value[0] = 0;
+  39:main.c        ****     }
+  40:main.c        ****     if (USBFS_GetEPState(3) == USBFS_IN_BUFFER_EMPTY)           // send pot value to Pi
+  72              		.loc 1 40 0
+  73 003e 0320     		movs	r0, #3
+  74 0040 FFF7FEFF 		bl	USBFS_GetEPState
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 3
+
+
+  75              	.LVL4:
+  76 0044 0128     		cmp	r0, #1
+  77 0046 04D1     		bne	.L1
+  41:main.c        ****     {
+  42:main.c        ****         USBFS_LoadInEP(3,pot1Value,1);
+  78              		.loc 1 42 0
+  79 0048 0320     		movs	r0, #3
+  80 004a 0449     		ldr	r1, .L6+8
+  81 004c 0122     		movs	r2, #1
+  82 004e FFF7FEFF 		bl	USBFS_LoadInEP
+  83              	.LVL5:
+  84              	.L1:
+  85 0052 08BD     		pop	{r3, pc}
+  86              	.L7:
+  87              		.align	2
+  88              	.L6:
+  89 0054 00000000 		.word	.LANCHOR0
+  90 0058 00000000 		.word	source
+  91 005c 00000000 		.word	pot1Value
+  92              		.cfi_endproc
+  93              	.LFE63:
+  94              		.size	ADCDMAISR1, .-ADCDMAISR1
+  95              		.section	.text.ADCDMAISR2,"ax",%progbits
+  96              		.align	2
+  97              		.global	ADCDMAISR2
+  98              		.thumb
+  99              		.thumb_func
+ 100              		.type	ADCDMAISR2, %function
+ 101              	ADCDMAISR2:
+ 102              	.LFB64:
+  43:main.c        ****     }
+  44:main.c        **** }
+  45:main.c        **** 
+  46:main.c        **** CY_ISR(ADCDMAISR2)
+  47:main.c        **** {
+ 103              		.loc 1 47 0
+ 104              		.cfi_startproc
+ 105              		@ args = 0, pretend = 0, frame = 0
+ 106              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107 0000 08B5     		push	{r3, lr}
+ 108              		.cfi_def_cfa_offset 8
+ 109              		.cfi_offset 3, -8
+ 110              		.cfi_offset 14, -4
+  48:main.c        ****     if (USBFS_GetEPState(2) == USBFS_IN_BUFFER_EMPTY)           // send data if the buffer is empty
+ 111              		.loc 1 48 0
+ 112 0002 0220     		movs	r0, #2
+ 113 0004 FFF7FEFF 		bl	USBFS_GetEPState
+ 114              	.LVL6:
+ 115 0008 0128     		cmp	r0, #1
+ 116 000a 09D1     		bne	.L9
+  49:main.c        ****     {
+  50:main.c        ****         USBFS_LoadInEP(2,source[1][probe2TXTD],64);
+ 117              		.loc 1 50 0
+ 118 000c 124B     		ldr	r3, .L13
+ 119 000e 5B68     		ldr	r3, [r3, #4]
+ 120 0010 0233     		adds	r3, r3, #2
+ 121 0012 0220     		movs	r0, #2
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 4
+
+
+ 122 0014 1149     		ldr	r1, .L13+4
+ 123 0016 01EB8311 		add	r1, r1, r3, lsl #6
+ 124 001a 4022     		movs	r2, #64
+ 125 001c FFF7FEFF 		bl	USBFS_LoadInEP
+ 126              	.LVL7:
+ 127              	.L9:
+  51:main.c        ****     }
+  52:main.c        ****     probe2TXTD = 1 - probe2TXTD;            // switch buffer to send from
+ 128              		.loc 1 52 0
+ 129 0020 0D4A     		ldr	r2, .L13
+ 130 0022 5368     		ldr	r3, [r2, #4]
+ 131 0024 C3F10103 		rsb	r3, r3, #1
+ 132 0028 5360     		str	r3, [r2, #4]
+  53:main.c        ****     
+  54:main.c        ****     potSelect_Select(1);            // select channel 1 pot
+ 133              		.loc 1 54 0
+ 134 002a 0120     		movs	r0, #1
+ 135 002c FFF7FEFF 		bl	potSelect_Select
+ 136              	.LVL8:
+  55:main.c        ****     pot2Value[0] = ADC_DelSig_Read16();
+ 137              		.loc 1 55 0
+ 138 0030 FFF7FEFF 		bl	ADC_DelSig_Read16
+ 139              	.LVL9:
+ 140 0034 C0B2     		uxtb	r0, r0
+ 141 0036 0A4B     		ldr	r3, .L13+8
+ 142 0038 1870     		strb	r0, [r3]
+  56:main.c        ****     if (pot2Value[0] >= 255)
+ 143              		.loc 1 56 0
+ 144 003a FF28     		cmp	r0, #255
+ 145 003c 01D1     		bne	.L10
+  57:main.c        ****     {
+  58:main.c        ****         pot2Value[0] = 255;
+ 146              		.loc 1 58 0
+ 147 003e FF22     		movs	r2, #255
+ 148 0040 1A70     		strb	r2, [r3]
+ 149              	.L10:
+  59:main.c        ****     }
+  60:main.c        ****     else if (pot2Value[0] < 0)
+  61:main.c        ****     {
+  62:main.c        ****         pot2Value[0] = 0;
+  63:main.c        ****     }
+  64:main.c        ****     if (USBFS_GetEPState(4) == USBFS_IN_BUFFER_EMPTY)           // send pot value to Pi
+ 150              		.loc 1 64 0
+ 151 0042 0420     		movs	r0, #4
+ 152 0044 FFF7FEFF 		bl	USBFS_GetEPState
+ 153              	.LVL10:
+ 154 0048 0128     		cmp	r0, #1
+ 155 004a 04D1     		bne	.L8
+  65:main.c        ****     {
+  66:main.c        ****         USBFS_LoadInEP(4,pot2Value,1);
+ 156              		.loc 1 66 0
+ 157 004c 0420     		movs	r0, #4
+ 158 004e 0449     		ldr	r1, .L13+8
+ 159 0050 0122     		movs	r2, #1
+ 160 0052 FFF7FEFF 		bl	USBFS_LoadInEP
+ 161              	.LVL11:
+ 162              	.L8:
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 5
+
+
+ 163 0056 08BD     		pop	{r3, pc}
+ 164              	.L14:
+ 165              		.align	2
+ 166              	.L13:
+ 167 0058 00000000 		.word	.LANCHOR0
+ 168 005c 00000000 		.word	source
+ 169 0060 00000000 		.word	pot2Value
+ 170              		.cfi_endproc
+ 171              	.LFE64:
+ 172              		.size	ADCDMAISR2, .-ADCDMAISR2
+ 173              		.section	.text.main,"ax",%progbits
+ 174              		.align	2
+ 175              		.global	main
+ 176              		.thumb
+ 177              		.thumb_func
+ 178              		.type	main, %function
+ 179              	main:
+ 180              	.LFB65:
+  67:main.c        ****     }
+  68:main.c        **** }
+  69:main.c        **** 
+  70:main.c        **** int main(void)
+  71:main.c        **** {
+ 181              		.loc 1 71 0
+ 182              		.cfi_startproc
+ 183              		@ args = 0, pretend = 0, frame = 8
+ 184              		@ frame_needed = 0, uses_anonymous_args = 0
+ 185 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 186              		.cfi_def_cfa_offset 24
+ 187              		.cfi_offset 4, -24
+ 188              		.cfi_offset 5, -20
+ 189              		.cfi_offset 6, -16
+ 190              		.cfi_offset 7, -12
+ 191              		.cfi_offset 8, -8
+ 192              		.cfi_offset 14, -4
+ 193 0004 82B0     		sub	sp, sp, #8
+ 194              		.cfi_def_cfa_offset 32
+  72:main.c        ****     CyGlobalIntEnable; /* Enable global interrupts. */
+ 195              		.loc 1 72 0
+ 196              	@ 72 "main.c" 1
+ 197 0006 62B6     		CPSIE   i
+ 198              	@ 0 "" 2
+  73:main.c        ****     USBFS_Start(0,USBFS_5V_OPERATION);
+ 199              		.loc 1 73 0
+ 200              		.thumb
+ 201 0008 0020     		movs	r0, #0
+ 202 000a 0121     		movs	r1, #1
+ 203 000c FFF7FEFF 		bl	USBFS_Start
+ 204              	.LVL12:
+ 205              	.L16:
+  74:main.c        ****     while (0u == USBFS_GetConfiguration())
+ 206              		.loc 1 74 0 discriminator 1
+ 207 0010 FFF7FEFF 		bl	USBFS_GetConfiguration
+ 208              	.LVL13:
+ 209 0014 0028     		cmp	r0, #0
+ 210 0016 FBD0     		beq	.L16
+  75:main.c        ****     {
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 6
+
+
+  76:main.c        ****         
+  77:main.c        ****     }
+  78:main.c        ****     USBFS_EnableOutEP(5);
+ 211              		.loc 1 78 0
+ 212 0018 0520     		movs	r0, #5
+ 213 001a FFF7FEFF 		bl	USBFS_EnableOutEP
+ 214              	.LVL14:
+  79:main.c        ****     
+  80:main.c        ****     ADCInt1_StartEx(ADCDMAISR1);
+ 215              		.loc 1 80 0
+ 216 001e 7148     		ldr	r0, .L32
+ 217 0020 FFF7FEFF 		bl	ADCInt1_StartEx
+ 218              	.LVL15:
+  81:main.c        ****     ADCInt2_StartEx(ADCDMAISR2);
+ 219              		.loc 1 81 0
+ 220 0024 7048     		ldr	r0, .L32+4
+ 221 0026 FFF7FEFF 		bl	ADCInt2_StartEx
+ 222              	.LVL16:
+  82:main.c        **** 
+  83:main.c        ****     //WaveDAC8_1_Start();
+  84:main.c        ****     ADC_SAR_1_Start();
+ 223              		.loc 1 84 0
+ 224 002a FFF7FEFF 		bl	ADC_SAR_1_Start
+ 225              	.LVL17:
+  85:main.c        ****     ADC_SAR_1_StartConvert();
+ 226              		.loc 1 85 0
+ 227 002e FFF7FEFF 		bl	ADC_SAR_1_StartConvert
+ 228              	.LVL18:
+  86:main.c        ****     
+  87:main.c        ****     //WaveDAC8_2_Start();
+  88:main.c        ****     ADC_SAR_2_Start();
+ 229              		.loc 1 88 0
+ 230 0032 FFF7FEFF 		bl	ADC_SAR_2_Start
+ 231              	.LVL19:
+  89:main.c        ****     ADC_SAR_2_StartConvert();
+ 232              		.loc 1 89 0
+ 233 0036 FFF7FEFF 		bl	ADC_SAR_2_StartConvert
+ 234              	.LVL20:
+  90:main.c        ****     
+  91:main.c        ****     potSelect_Start();
+ 235              		.loc 1 91 0
+ 236 003a FFF7FEFF 		bl	potSelect_Start
+ 237              	.LVL21:
+  92:main.c        ****     potSelect_Select(0);
+ 238              		.loc 1 92 0
+ 239 003e 0020     		movs	r0, #0
+ 240 0040 FFF7FEFF 		bl	potSelect_Select
+ 241              	.LVL22:
+  93:main.c        ****     ADC_DelSig_Start();
+ 242              		.loc 1 93 0
+ 243 0044 FFF7FEFF 		bl	ADC_DelSig_Start
+ 244              	.LVL23:
+  94:main.c        ****     
+  95:main.c        ****     /* Defines for DMA_1 */
+  96:main.c        ****     #define DMA_1_BYTES_PER_BURST 1
+  97:main.c        ****     #define DMA_1_REQUEST_PER_BURST 1
+  98:main.c        ****     #define DMA_1_SRC_BASE (CYDEV_PERIPH_BASE)
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 7
+
+
+  99:main.c        ****     #define DMA_1_DST_BASE (CYDEV_SRAM_BASE)
+ 100:main.c        **** 
+ 101:main.c        ****     /* Variable declarations for DMA_1 */
+ 102:main.c        ****     /* Move these variable declarations to the top of the function */
+ 103:main.c        ****     
+ 104:main.c        ****     uint8 DMA_1_Chan;
+ 105:main.c        ****     uint8 DMA_1_TD[2];
+ 106:main.c        **** 
+ 107:main.c        ****     /* DMA Configuration for DMA_1 */
+ 108:main.c        ****     
+ 109:main.c        ****     DMA_1_Chan = ADCDMA1_DmaInitialize(DMA_1_BYTES_PER_BURST, DMA_1_REQUEST_PER_BURST, 
+ 245              		.loc 1 109 0
+ 246 0048 0120     		movs	r0, #1
+ 247 004a 0146     		mov	r1, r0
+ 248 004c 4FF48042 		mov	r2, #16384
+ 249 0050 41F6FF73 		movw	r3, #8191
+ 250 0054 FFF7FEFF 		bl	ADCDMA1_DmaInitialize
+ 251              	.LVL24:
+ 252 0058 0646     		mov	r6, r0
+ 253              	.LVL25:
+ 110:main.c        ****                                      HI16(DMA_1_SRC_BASE), HI16(DMA_1_DST_BASE));
+ 111:main.c        ****     DMA_1_TD[0] = CyDmaTdAllocate();
+ 254              		.loc 1 111 0
+ 255 005a FFF7FEFF 		bl	CyDmaTdAllocate
+ 256              	.LVL26:
+ 257 005e 0546     		mov	r5, r0
+ 112:main.c        ****     DMA_1_TD[1] = CyDmaTdAllocate();
+ 258              		.loc 1 112 0
+ 259 0060 FFF7FEFF 		bl	CyDmaTdAllocate
+ 260              	.LVL27:
+ 261 0064 0746     		mov	r7, r0
+ 113:main.c        ****     CyDmaTdSetConfiguration(DMA_1_TD[0], 64, DMA_1_TD[1], ADCDMA1__TD_TERMOUT_EN | CY_DMA_TD_INC_DS
+ 262              		.loc 1 113 0
+ 263 0066 2846     		mov	r0, r5
+ 264 0068 4021     		movs	r1, #64
+ 265 006a 3A46     		mov	r2, r7
+ 266 006c 0623     		movs	r3, #6
+ 267 006e FFF7FEFF 		bl	CyDmaTdSetConfiguration
+ 268              	.LVL28:
+ 114:main.c        ****     CyDmaTdSetConfiguration(DMA_1_TD[1], 64, DMA_1_TD[0], ADCDMA1__TD_TERMOUT_EN | CY_DMA_TD_INC_DS
+ 269              		.loc 1 114 0
+ 270 0072 3846     		mov	r0, r7
+ 271 0074 4021     		movs	r1, #64
+ 272 0076 2A46     		mov	r2, r5
+ 273 0078 0623     		movs	r3, #6
+ 274 007a FFF7FEFF 		bl	CyDmaTdSetConfiguration
+ 275              	.LVL29:
+ 115:main.c        ****     CyDmaTdSetAddress(DMA_1_TD[0], LO16((uint32)ADC_SAR_1_SAR_WRK0_PTR), LO16((uint32)&source[0][0]
+ 276              		.loc 1 115 0
+ 277 007e 5B4C     		ldr	r4, .L32+8
+ 278 0080 2846     		mov	r0, r5
+ 279 0082 45F6A031 		movw	r1, #23456
+ 280 0086 A2B2     		uxth	r2, r4
+ 281 0088 FFF7FEFF 		bl	CyDmaTdSetAddress
+ 282              	.LVL30:
+ 116:main.c        ****     CyDmaTdSetAddress(DMA_1_TD[1], LO16((uint32)ADC_SAR_1_SAR_WRK0_PTR), LO16((uint32)&source[0][1]
+ 283              		.loc 1 116 0
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 8
+
+
+ 284 008c 04F14002 		add	r2, r4, #64
+ 285 0090 3846     		mov	r0, r7
+ 286 0092 45F6A031 		movw	r1, #23456
+ 287 0096 92B2     		uxth	r2, r2
+ 288 0098 FFF7FEFF 		bl	CyDmaTdSetAddress
+ 289              	.LVL31:
+ 117:main.c        ****     CyDmaChSetInitialTd(DMA_1_Chan, DMA_1_TD[0]);
+ 290              		.loc 1 117 0
+ 291 009c 3046     		mov	r0, r6
+ 292 009e 2946     		mov	r1, r5
+ 293 00a0 FFF7FEFF 		bl	CyDmaChSetInitialTd
+ 294              	.LVL32:
+ 118:main.c        ****     CyDmaChEnable(DMA_1_Chan, 1);
+ 295              		.loc 1 118 0
+ 296 00a4 3046     		mov	r0, r6
+ 297 00a6 0121     		movs	r1, #1
+ 298 00a8 FFF7FEFF 		bl	CyDmaChEnable
+ 299              	.LVL33:
+ 119:main.c        ****     
+ 120:main.c        ****     
+ 121:main.c        ****     /* Defines for ADCDMA2 */
+ 122:main.c        ****     #define ADCDMA2_BYTES_PER_BURST 1
+ 123:main.c        ****     #define ADCDMA2_REQUEST_PER_BURST 1
+ 124:main.c        ****     #define ADCDMA2_SRC_BASE (CYDEV_PERIPH_BASE)
+ 125:main.c        ****     #define ADCDMA2_DST_BASE (CYDEV_SRAM_BASE)
+ 126:main.c        **** 
+ 127:main.c        ****     /* Variable declarations for ADCDMA2 */
+ 128:main.c        ****     /* Move these variable declarations to the top of the function */
+ 129:main.c        ****     uint8 ADCDMA2_Chan;
+ 130:main.c        ****     uint8 ADCDMA2_TD[2];
+ 131:main.c        **** 
+ 132:main.c        ****     /* DMA Configuration for ADCDMA2 */
+ 133:main.c        ****     ADCDMA2_Chan = ADCDMA2_DmaInitialize(ADCDMA2_BYTES_PER_BURST, ADCDMA2_REQUEST_PER_BURST, 
+ 300              		.loc 1 133 0
+ 301 00ac 0120     		movs	r0, #1
+ 302 00ae 0146     		mov	r1, r0
+ 303 00b0 4FF48042 		mov	r2, #16384
+ 304 00b4 41F6FF73 		movw	r3, #8191
+ 305 00b8 FFF7FEFF 		bl	ADCDMA2_DmaInitialize
+ 306              	.LVL34:
+ 307 00bc 0546     		mov	r5, r0
+ 308              	.LVL35:
+ 134:main.c        ****                                          HI16(ADCDMA2_SRC_BASE), HI16(ADCDMA2_DST_BASE));
+ 135:main.c        ****     ADCDMA2_TD[0] = CyDmaTdAllocate();
+ 309              		.loc 1 135 0
+ 310 00be FFF7FEFF 		bl	CyDmaTdAllocate
+ 311              	.LVL36:
+ 312 00c2 0746     		mov	r7, r0
+ 136:main.c        ****     ADCDMA2_TD[1] = CyDmaTdAllocate();
+ 313              		.loc 1 136 0
+ 314 00c4 FFF7FEFF 		bl	CyDmaTdAllocate
+ 315              	.LVL37:
+ 316 00c8 8046     		mov	r8, r0
+ 137:main.c        ****     CyDmaTdSetConfiguration(ADCDMA2_TD[0], 64, ADCDMA2_TD[1], ADCDMA2__TD_TERMOUT_EN | CY_DMA_TD_IN
+ 317              		.loc 1 137 0
+ 318 00ca 3846     		mov	r0, r7
+ 319 00cc 4021     		movs	r1, #64
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 9
+
+
+ 320 00ce 4246     		mov	r2, r8
+ 321 00d0 0623     		movs	r3, #6
+ 322 00d2 FFF7FEFF 		bl	CyDmaTdSetConfiguration
+ 323              	.LVL38:
+ 138:main.c        ****     CyDmaTdSetConfiguration(ADCDMA2_TD[1], 64, ADCDMA2_TD[0], ADCDMA2__TD_TERMOUT_EN | CY_DMA_TD_IN
+ 324              		.loc 1 138 0
+ 325 00d6 4046     		mov	r0, r8
+ 326 00d8 4021     		movs	r1, #64
+ 327 00da 3A46     		mov	r2, r7
+ 328 00dc 0623     		movs	r3, #6
+ 329 00de FFF7FEFF 		bl	CyDmaTdSetConfiguration
+ 330              	.LVL39:
+ 139:main.c        ****     CyDmaTdSetAddress(ADCDMA2_TD[0], LO16((uint32)ADC_SAR_2_SAR_WRK0_PTR), LO16((uint32)&source[1][
+ 331              		.loc 1 139 0
+ 332 00e2 04F18002 		add	r2, r4, #128
+ 333 00e6 3846     		mov	r0, r7
+ 334 00e8 45F6A231 		movw	r1, #23458
+ 335 00ec 92B2     		uxth	r2, r2
+ 336 00ee FFF7FEFF 		bl	CyDmaTdSetAddress
+ 337              	.LVL40:
+ 140:main.c        ****     CyDmaTdSetAddress(ADCDMA2_TD[1], LO16((uint32)ADC_SAR_2_SAR_WRK0_PTR), LO16((uint32)&source[1][
+ 338              		.loc 1 140 0
+ 339 00f2 04F1C002 		add	r2, r4, #192
+ 340 00f6 4046     		mov	r0, r8
+ 341 00f8 45F6A231 		movw	r1, #23458
+ 342 00fc 92B2     		uxth	r2, r2
+ 343 00fe FFF7FEFF 		bl	CyDmaTdSetAddress
+ 344              	.LVL41:
+ 141:main.c        ****     CyDmaChSetInitialTd(ADCDMA2_Chan, ADCDMA2_TD[0]);
+ 345              		.loc 1 141 0
+ 346 0102 2846     		mov	r0, r5
+ 347 0104 3946     		mov	r1, r7
+ 348 0106 FFF7FEFF 		bl	CyDmaChSetInitialTd
+ 349              	.LVL42:
+ 142:main.c        ****     CyDmaChEnable(ADCDMA2_Chan, 1);
+ 350              		.loc 1 142 0
+ 351 010a 2846     		mov	r0, r5
+ 352 010c 0121     		movs	r1, #1
+ 353 010e FFF7FEFF 		bl	CyDmaChEnable
+ 354              	.LVL43:
+ 355              	.L26:
+ 143:main.c        **** 
+ 144:main.c        ****     
+ 145:main.c        ****     uint8 run[1];       // variable for starting /stopiing data collection
+ 146:main.c        ****     int i,j,k;
+ 147:main.c        ****     
+ 148:main.c        ****     for(;;)
+ 149:main.c        ****     {
+ 150:main.c        ****         /* Place your application code here. */
+ 151:main.c        ****         if (USBFS_GetEPState(5) != USBFS_OUT_BUFFER_EMPTY)          // receive data on run argument
+ 356              		.loc 1 151 0
+ 357 0112 0520     		movs	r0, #5
+ 358 0114 FFF7FEFF 		bl	USBFS_GetEPState
+ 359              	.LVL44:
+ 360 0118 20B1     		cbz	r0, .L17
+ 152:main.c        ****         {
+ 153:main.c        ****             USBFS_ReadOutEP(5,run,1);
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 10
+
+
+ 361              		.loc 1 153 0
+ 362 011a 0520     		movs	r0, #5
+ 363 011c 01A9     		add	r1, sp, #4
+ 364 011e 0122     		movs	r2, #1
+ 365 0120 FFF7FEFF 		bl	USBFS_ReadOutEP
+ 366              	.LVL45:
+ 367              	.L17:
+ 154:main.c        ****         }
+ 155:main.c        ****         if (run[0] == 1)            // if run is 1 then enable DMAs and send data to Pi
+ 368              		.loc 1 155 0
+ 369 0124 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 370 0128 012B     		cmp	r3, #1
+ 371 012a 0AD1     		bne	.L18
+ 156:main.c        ****         {
+ 157:main.c        ****             CyDmaChEnable(ADCDMA2_Chan,1);
+ 372              		.loc 1 157 0
+ 373 012c 2846     		mov	r0, r5
+ 374 012e 0121     		movs	r1, #1
+ 375 0130 FFF7FEFF 		bl	CyDmaChEnable
+ 376              	.LVL46:
+ 158:main.c        ****             CyDmaChEnable(DMA_1_Chan,1);
+ 377              		.loc 1 158 0
+ 378 0134 3046     		mov	r0, r6
+ 379 0136 0121     		movs	r1, #1
+ 380 0138 FFF7FEFF 		bl	CyDmaChEnable
+ 381              	.LVL47:
+ 159:main.c        ****             run[0] = 2;
+ 382              		.loc 1 159 0
+ 383 013c 0223     		movs	r3, #2
+ 384 013e 8DF80430 		strb	r3, [sp, #4]
+ 385              	.L18:
+ 160:main.c        ****         }
+ 161:main.c        ****         if (run[0] == 0)            // if run is 0 stop the DMAs
+ 386              		.loc 1 161 0
+ 387 0142 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 388 0146 F3B9     		cbnz	r3, .L19
+ 162:main.c        ****         {
+ 163:main.c        ****             CyDmaChDisable(ADCDMA2_Chan);
+ 389              		.loc 1 163 0
+ 390 0148 2846     		mov	r0, r5
+ 391 014a FFF7FEFF 		bl	CyDmaChDisable
+ 392              	.LVL48:
+ 164:main.c        ****             CyDmaChDisable(DMA_1_Chan);
+ 393              		.loc 1 164 0
+ 394 014e 3046     		mov	r0, r6
+ 395 0150 FFF7FEFF 		bl	CyDmaChDisable
+ 396              	.LVL49:
+ 165:main.c        ****             for (i = 0; i < 2; i++)         // clears the send buffer when run is 0
+ 397              		.loc 1 165 0
+ 398 0154 0027     		movs	r7, #0
+ 399 0156 11E0     		b	.L20
+ 400              	.LVL50:
+ 401              	.L21:
+ 166:main.c        ****             {
+ 167:main.c        ****                 for (j = 0; j < 2; j++)
+ 168:main.c        ****                 {
+ 169:main.c        ****                     for (k = 0; k < 64; k++)
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 11
+
+
+ 170:main.c        ****                     {
+ 171:main.c        ****                        source[i][j][k] = 0;
+ 402              		.loc 1 171 0 discriminator 3
+ 403 0158 04EB4702 		add	r2, r4, r7, lsl #1
+ 404 015c 03EB8212 		add	r2, r3, r2, lsl #6
+ 405 0160 0020     		movs	r0, #0
+ 406 0162 2249     		ldr	r1, .L32+8
+ 407 0164 8854     		strb	r0, [r1, r2]
+ 169:main.c        ****                     {
+ 408              		.loc 1 169 0 discriminator 3
+ 409 0166 0133     		adds	r3, r3, #1
+ 410              	.LVL51:
+ 411 0168 00E0     		b	.L22
+ 412              	.LVL52:
+ 413              	.L29:
+ 414 016a 0023     		movs	r3, #0
+ 415              	.L22:
+ 416              	.LVL53:
+ 169:main.c        ****                     {
+ 417              		.loc 1 169 0 is_stmt 0 discriminator 1
+ 418 016c 3F2B     		cmp	r3, #63
+ 419 016e F3DD     		ble	.L21
+ 167:main.c        ****                 {
+ 420              		.loc 1 167 0 is_stmt 1 discriminator 2
+ 421 0170 0134     		adds	r4, r4, #1
+ 422              	.LVL54:
+ 423 0172 00E0     		b	.L23
+ 424              	.LVL55:
+ 425              	.L30:
+ 426 0174 0024     		movs	r4, #0
+ 427              	.L23:
+ 428              	.LVL56:
+ 167:main.c        ****                 {
+ 429              		.loc 1 167 0 is_stmt 0 discriminator 1
+ 430 0176 012C     		cmp	r4, #1
+ 431 0178 F7DD     		ble	.L29
+ 165:main.c        ****             {
+ 432              		.loc 1 165 0 is_stmt 1 discriminator 2
+ 433 017a 0137     		adds	r7, r7, #1
+ 434              	.LVL57:
+ 435              	.L20:
+ 165:main.c        ****             {
+ 436              		.loc 1 165 0 is_stmt 0 discriminator 1
+ 437 017c 012F     		cmp	r7, #1
+ 438 017e F9DD     		ble	.L30
+ 172:main.c        ****                     }
+ 173:main.c        ****                 }
+ 174:main.c        ****             }
+ 175:main.c        ****             run[0] = 3;         // set run 3 so that i can continuously send zeros to the Pi
+ 439              		.loc 1 175 0 is_stmt 1
+ 440 0180 0323     		movs	r3, #3
+ 441 0182 8DF80430 		strb	r3, [sp, #4]
+ 442              	.LVL58:
+ 443              	.L19:
+ 176:main.c        ****         }
+ 177:main.c        ****         if (run[0] == 3)            // send zeros to Pi
+ 444              		.loc 1 177 0
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 12
+
+
+ 445 0186 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 446 018a 032B     		cmp	r3, #3
+ 447 018c 12D1     		bne	.L24
+ 178:main.c        ****         {
+ 179:main.c        ****             if (USBFS_GetEPState(1) == USBFS_IN_BUFFER_EMPTY)
+ 448              		.loc 1 179 0
+ 449 018e 0120     		movs	r0, #1
+ 450 0190 FFF7FEFF 		bl	USBFS_GetEPState
+ 451              	.LVL59:
+ 452 0194 0128     		cmp	r0, #1
+ 453 0196 03D1     		bne	.L25
+ 180:main.c        ****             {
+ 181:main.c        ****                 USBFS_LoadInEP(1,source[1][0],64);
+ 454              		.loc 1 181 0
+ 455 0198 1549     		ldr	r1, .L32+12
+ 456 019a 4022     		movs	r2, #64
+ 457 019c FFF7FEFF 		bl	USBFS_LoadInEP
+ 458              	.LVL60:
+ 459              	.L25:
+ 182:main.c        ****             }
+ 183:main.c        ****             if (USBFS_GetEPState(2) == USBFS_IN_BUFFER_EMPTY)
+ 460              		.loc 1 183 0
+ 461 01a0 0220     		movs	r0, #2
+ 462 01a2 FFF7FEFF 		bl	USBFS_GetEPState
+ 463              	.LVL61:
+ 464 01a6 0128     		cmp	r0, #1
+ 465 01a8 04D1     		bne	.L24
+ 184:main.c        ****             {
+ 185:main.c        ****                 USBFS_LoadInEP(2,source[1][0],64);
+ 466              		.loc 1 185 0
+ 467 01aa 0220     		movs	r0, #2
+ 468 01ac 1049     		ldr	r1, .L32+12
+ 469 01ae 4022     		movs	r2, #64
+ 470 01b0 FFF7FEFF 		bl	USBFS_LoadInEP
+ 471              	.LVL62:
+ 472              	.L24:
+ 186:main.c        ****             } 
+ 187:main.c        ****         }
+ 188:main.c        ****         if (0u != USBFS_IsConfigurationChanged())
+ 473              		.loc 1 188 0
+ 474 01b4 FFF7FEFF 		bl	USBFS_IsConfigurationChanged
+ 475              	.LVL63:
+ 476 01b8 0028     		cmp	r0, #0
+ 477 01ba AAD0     		beq	.L26
+ 189:main.c        ****         {
+ 190:main.c        ****             /* Re-enable endpoint when device is configured. */
+ 191:main.c        ****             if (0u != USBFS_GetConfiguration())
+ 478              		.loc 1 191 0
+ 479 01bc FFF7FEFF 		bl	USBFS_GetConfiguration
+ 480              	.LVL64:
+ 481 01c0 0028     		cmp	r0, #0
+ 482 01c2 A6D0     		beq	.L26
+ 192:main.c        ****             {
+ 193:main.c        ****                 /* Enable OUT endpoint to receive data from host. */
+ 194:main.c        ****                 USBFS_EnableOutEP(1);
+ 483              		.loc 1 194 0
+ 484 01c4 0120     		movs	r0, #1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 13
+
+
+ 485 01c6 FFF7FEFF 		bl	USBFS_EnableOutEP
+ 486              	.LVL65:
+ 195:main.c        ****                 USBFS_EnableOutEP(2);
+ 487              		.loc 1 195 0
+ 488 01ca 0220     		movs	r0, #2
+ 489 01cc FFF7FEFF 		bl	USBFS_EnableOutEP
+ 490              	.LVL66:
+ 196:main.c        ****                 USBFS_EnableOutEP(3);
+ 491              		.loc 1 196 0
+ 492 01d0 0320     		movs	r0, #3
+ 493 01d2 FFF7FEFF 		bl	USBFS_EnableOutEP
+ 494              	.LVL67:
+ 197:main.c        ****                 USBFS_EnableOutEP(4);
+ 495              		.loc 1 197 0
+ 496 01d6 0420     		movs	r0, #4
+ 497 01d8 FFF7FEFF 		bl	USBFS_EnableOutEP
+ 498              	.LVL68:
+ 198:main.c        ****                 USBFS_EnableOutEP(5);
+ 499              		.loc 1 198 0
+ 500 01dc 0520     		movs	r0, #5
+ 501 01de FFF7FEFF 		bl	USBFS_EnableOutEP
+ 502              	.LVL69:
+ 503 01e2 96E7     		b	.L26
+ 504              	.L33:
+ 505              		.align	2
+ 506              	.L32:
+ 507 01e4 00000000 		.word	ADCDMAISR1
+ 508 01e8 00000000 		.word	ADCDMAISR2
+ 509 01ec 00000000 		.word	source
+ 510 01f0 80000000 		.word	source+128
+ 511              		.cfi_endproc
+ 512              	.LFE65:
+ 513              		.size	main, .-main
+ 514              		.comm	pot2Value,1,4
+ 515              		.comm	pot1Value,1,4
+ 516              		.global	probe2TXTD
+ 517              		.global	probe1TXTD
+ 518              		.comm	source,256,4
+ 519              		.bss
+ 520              		.align	2
+ 521              		.set	.LANCHOR0,. + 0
+ 522              		.type	probe1TXTD, %object
+ 523              		.size	probe1TXTD, 4
+ 524              	probe1TXTD:
+ 525 0000 00000000 		.space	4
+ 526              		.type	probe2TXTD, %object
+ 527              		.size	probe2TXTD, 4
+ 528              	probe2TXTD:
+ 529 0004 00000000 		.space	4
+ 530              		.text
+ 531              	.Letext0:
+ 532              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.0\\psoc creator\\import\\gnu\\arm\\4.9.
+ 533              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.0\\psoc creator\\import\\gnu\\arm\\4.9.
+ 534              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 535              		.file 5 "Generated_Source\\PSoC5/core_cm3.h"
+ 536              		.file 6 "Generated_Source\\PSoC5/USBFS.h"
+ 537              		.file 7 "Generated_Source\\PSoC5/potSelect.h"
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 14
+
+
+ 538              		.file 8 "Generated_Source\\PSoC5/ADC_DelSig.h"
+ 539              		.file 9 "Generated_Source\\PSoC5/ADCInt1.h"
+ 540              		.file 10 "Generated_Source\\PSoC5/ADCInt2.h"
+ 541              		.file 11 "Generated_Source\\PSoC5/ADC_SAR_1.h"
+ 542              		.file 12 "Generated_Source\\PSoC5/ADC_SAR_2.h"
+ 543              		.file 13 "Generated_Source\\PSoC5/ADCDMA1_dma.h"
+ 544              		.file 14 "Generated_Source\\PSoC5/CYDMAC.H"
+ 545              		.file 15 "Generated_Source\\PSoC5/ADCDMA2_dma.h"
+ 546              		.section	.debug_info,"",%progbits
+ 547              	.Ldebug_info0:
+ 548 0000 16090000 		.4byte	0x916
+ 549 0004 0400     		.2byte	0x4
+ 550 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 551 000a 04       		.byte	0x4
+ 552 000b 01       		.uleb128 0x1
+ 553 000c 20030000 		.4byte	.LASF59
+ 554 0010 01       		.byte	0x1
+ 555 0011 B4020000 		.4byte	.LASF60
+ 556 0015 88010000 		.4byte	.LASF61
+ 557 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 558 001d 00000000 		.4byte	0
+ 559 0021 00000000 		.4byte	.Ldebug_line0
+ 560 0025 02       		.uleb128 0x2
+ 561 0026 01       		.byte	0x1
+ 562 0027 06       		.byte	0x6
+ 563 0028 F9010000 		.4byte	.LASF0
+ 564 002c 02       		.uleb128 0x2
+ 565 002d 01       		.byte	0x1
+ 566 002e 08       		.byte	0x8
+ 567 002f 6A010000 		.4byte	.LASF1
+ 568 0033 02       		.uleb128 0x2
+ 569 0034 02       		.byte	0x2
+ 570 0035 05       		.byte	0x5
+ 571 0036 50000000 		.4byte	.LASF2
+ 572 003a 02       		.uleb128 0x2
+ 573 003b 02       		.byte	0x2
+ 574 003c 07       		.byte	0x7
+ 575 003d 5A020000 		.4byte	.LASF3
+ 576 0041 03       		.uleb128 0x3
+ 577 0042 16030000 		.4byte	.LASF9
+ 578 0046 02       		.byte	0x2
+ 579 0047 3F       		.byte	0x3f
+ 580 0048 4C000000 		.4byte	0x4c
+ 581 004c 02       		.uleb128 0x2
+ 582 004d 04       		.byte	0x4
+ 583 004e 05       		.byte	0x5
+ 584 004f 32010000 		.4byte	.LASF4
+ 585 0053 02       		.uleb128 0x2
+ 586 0054 04       		.byte	0x4
+ 587 0055 07       		.byte	0x7
+ 588 0056 C0020000 		.4byte	.LASF5
+ 589 005a 02       		.uleb128 0x2
+ 590 005b 08       		.byte	0x8
+ 591 005c 05       		.byte	0x5
+ 592 005d 08010000 		.4byte	.LASF6
+ 593 0061 02       		.uleb128 0x2
+ 594 0062 08       		.byte	0x8
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 15
+
+
+ 595 0063 07       		.byte	0x7
+ 596 0064 05020000 		.4byte	.LASF7
+ 597 0068 04       		.uleb128 0x4
+ 598 0069 04       		.byte	0x4
+ 599 006a 05       		.byte	0x5
+ 600 006b 696E7400 		.ascii	"int\000"
+ 601 006f 02       		.uleb128 0x2
+ 602 0070 04       		.byte	0x4
+ 603 0071 07       		.byte	0x7
+ 604 0072 1C020000 		.4byte	.LASF8
+ 605 0076 03       		.uleb128 0x3
+ 606 0077 92020000 		.4byte	.LASF10
+ 607 007b 03       		.byte	0x3
+ 608 007c 2C       		.byte	0x2c
+ 609 007d 41000000 		.4byte	0x41
+ 610 0081 05       		.uleb128 0x5
+ 611 0082 A7020000 		.4byte	.LASF11
+ 612 0086 04       		.byte	0x4
+ 613 0087 9201     		.2byte	0x192
+ 614 0089 2C000000 		.4byte	0x2c
+ 615 008d 05       		.uleb128 0x5
+ 616 008e D4000000 		.4byte	.LASF12
+ 617 0092 04       		.byte	0x4
+ 618 0093 9301     		.2byte	0x193
+ 619 0095 3A000000 		.4byte	0x3a
+ 620 0099 05       		.uleb128 0x5
+ 621 009a AD020000 		.4byte	.LASF13
+ 622 009e 04       		.byte	0x4
+ 623 009f 9401     		.2byte	0x194
+ 624 00a1 53000000 		.4byte	0x53
+ 625 00a5 05       		.uleb128 0x5
+ 626 00a6 DB000000 		.4byte	.LASF14
+ 627 00aa 04       		.byte	0x4
+ 628 00ab 9601     		.2byte	0x196
+ 629 00ad 33000000 		.4byte	0x33
+ 630 00b1 02       		.uleb128 0x2
+ 631 00b2 04       		.byte	0x4
+ 632 00b3 04       		.byte	0x4
+ 633 00b4 EC000000 		.4byte	.LASF15
+ 634 00b8 02       		.uleb128 0x2
+ 635 00b9 08       		.byte	0x8
+ 636 00ba 04       		.byte	0x4
+ 637 00bb D2020000 		.4byte	.LASF16
+ 638 00bf 02       		.uleb128 0x2
+ 639 00c0 01       		.byte	0x1
+ 640 00c1 08       		.byte	0x8
+ 641 00c2 6D020000 		.4byte	.LASF17
+ 642 00c6 05       		.uleb128 0x5
+ 643 00c7 72020000 		.4byte	.LASF18
+ 644 00cb 04       		.byte	0x4
+ 645 00cc 3402     		.2byte	0x234
+ 646 00ce 53000000 		.4byte	0x53
+ 647 00d2 05       		.uleb128 0x5
+ 648 00d3 BB020000 		.4byte	.LASF19
+ 649 00d7 04       		.byte	0x4
+ 650 00d8 3C02     		.2byte	0x23c
+ 651 00da DE000000 		.4byte	0xde
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 16
+
+
+ 652 00de 06       		.uleb128 0x6
+ 653 00df 81000000 		.4byte	0x81
+ 654 00e3 05       		.uleb128 0x5
+ 655 00e4 B3000000 		.4byte	.LASF20
+ 656 00e8 04       		.byte	0x4
+ 657 00e9 4E02     		.2byte	0x24e
+ 658 00eb EF000000 		.4byte	0xef
+ 659 00ef 07       		.uleb128 0x7
+ 660 00f0 04       		.byte	0x4
+ 661 00f1 F5000000 		.4byte	0xf5
+ 662 00f5 08       		.uleb128 0x8
+ 663 00f6 02       		.uleb128 0x2
+ 664 00f7 04       		.byte	0x4
+ 665 00f8 07       		.byte	0x7
+ 666 00f9 89000000 		.4byte	.LASF21
+ 667 00fd 09       		.uleb128 0x9
+ 668 00fe DB030000 		.4byte	.LASF22
+ 669 0102 01       		.byte	0x1
+ 670 0103 16       		.byte	0x16
+ 671 0104 00000000 		.4byte	.LFB63
+ 672 0108 60000000 		.4byte	.LFE63-.LFB63
+ 673 010c 01       		.uleb128 0x1
+ 674 010d 9C       		.byte	0x9c
+ 675 010e 86010000 		.4byte	0x186
+ 676 0112 0A       		.uleb128 0xa
+ 677 0113 08000000 		.4byte	.LVL0
+ 678 0117 2E070000 		.4byte	0x72e
+ 679 011b 25010000 		.4byte	0x125
+ 680 011f 0B       		.uleb128 0xb
+ 681 0120 01       		.uleb128 0x1
+ 682 0121 50       		.byte	0x50
+ 683 0122 01       		.uleb128 0x1
+ 684 0123 31       		.byte	0x31
+ 685 0124 00       		.byte	0
+ 686 0125 0A       		.uleb128 0xa
+ 687 0126 1C000000 		.4byte	.LVL1
+ 688 012a 44070000 		.4byte	0x744
+ 689 012e 39010000 		.4byte	0x139
+ 690 0132 0B       		.uleb128 0xb
+ 691 0133 01       		.uleb128 0x1
+ 692 0134 52       		.byte	0x52
+ 693 0135 02       		.uleb128 0x2
+ 694 0136 08       		.byte	0x8
+ 695 0137 40       		.byte	0x40
+ 696 0138 00       		.byte	0
+ 697 0139 0A       		.uleb128 0xa
+ 698 013a 2C000000 		.4byte	.LVL2
+ 699 013e 6B070000 		.4byte	0x76b
+ 700 0142 4C010000 		.4byte	0x14c
+ 701 0146 0B       		.uleb128 0xb
+ 702 0147 01       		.uleb128 0x1
+ 703 0148 50       		.byte	0x50
+ 704 0149 01       		.uleb128 0x1
+ 705 014a 30       		.byte	0x30
+ 706 014b 00       		.byte	0
+ 707 014c 0C       		.uleb128 0xc
+ 708 014d 30000000 		.4byte	.LVL3
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 17
+
+
+ 709 0151 7C070000 		.4byte	0x77c
+ 710 0155 0A       		.uleb128 0xa
+ 711 0156 44000000 		.4byte	.LVL4
+ 712 015a 2E070000 		.4byte	0x72e
+ 713 015e 68010000 		.4byte	0x168
+ 714 0162 0B       		.uleb128 0xb
+ 715 0163 01       		.uleb128 0x1
+ 716 0164 50       		.byte	0x50
+ 717 0165 01       		.uleb128 0x1
+ 718 0166 33       		.byte	0x33
+ 719 0167 00       		.byte	0
+ 720 0168 0D       		.uleb128 0xd
+ 721 0169 52000000 		.4byte	.LVL5
+ 722 016d 44070000 		.4byte	0x744
+ 723 0171 0B       		.uleb128 0xb
+ 724 0172 01       		.uleb128 0x1
+ 725 0173 52       		.byte	0x52
+ 726 0174 01       		.uleb128 0x1
+ 727 0175 31       		.byte	0x31
+ 728 0176 0B       		.uleb128 0xb
+ 729 0177 01       		.uleb128 0x1
+ 730 0178 51       		.byte	0x51
+ 731 0179 05       		.uleb128 0x5
+ 732 017a 03       		.byte	0x3
+ 733 017b 00000000 		.4byte	pot1Value
+ 734 017f 0B       		.uleb128 0xb
+ 735 0180 01       		.uleb128 0x1
+ 736 0181 50       		.byte	0x50
+ 737 0182 01       		.uleb128 0x1
+ 738 0183 33       		.byte	0x33
+ 739 0184 00       		.byte	0
+ 740 0185 00       		.byte	0
+ 741 0186 09       		.uleb128 0x9
+ 742 0187 E6030000 		.4byte	.LASF23
+ 743 018b 01       		.byte	0x1
+ 744 018c 2E       		.byte	0x2e
+ 745 018d 00000000 		.4byte	.LFB64
+ 746 0191 64000000 		.4byte	.LFE64-.LFB64
+ 747 0195 01       		.uleb128 0x1
+ 748 0196 9C       		.byte	0x9c
+ 749 0197 14020000 		.4byte	0x214
+ 750 019b 0A       		.uleb128 0xa
+ 751 019c 08000000 		.4byte	.LVL6
+ 752 01a0 2E070000 		.4byte	0x72e
+ 753 01a4 AE010000 		.4byte	0x1ae
+ 754 01a8 0B       		.uleb128 0xb
+ 755 01a9 01       		.uleb128 0x1
+ 756 01aa 50       		.byte	0x50
+ 757 01ab 01       		.uleb128 0x1
+ 758 01ac 32       		.byte	0x32
+ 759 01ad 00       		.byte	0
+ 760 01ae 0A       		.uleb128 0xa
+ 761 01af 20000000 		.4byte	.LVL7
+ 762 01b3 44070000 		.4byte	0x744
+ 763 01b7 C7010000 		.4byte	0x1c7
+ 764 01bb 0B       		.uleb128 0xb
+ 765 01bc 01       		.uleb128 0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 18
+
+
+ 766 01bd 52       		.byte	0x52
+ 767 01be 02       		.uleb128 0x2
+ 768 01bf 08       		.byte	0x8
+ 769 01c0 40       		.byte	0x40
+ 770 01c1 0B       		.uleb128 0xb
+ 771 01c2 01       		.uleb128 0x1
+ 772 01c3 50       		.byte	0x50
+ 773 01c4 01       		.uleb128 0x1
+ 774 01c5 32       		.byte	0x32
+ 775 01c6 00       		.byte	0
+ 776 01c7 0A       		.uleb128 0xa
+ 777 01c8 30000000 		.4byte	.LVL8
+ 778 01cc 6B070000 		.4byte	0x76b
+ 779 01d0 DA010000 		.4byte	0x1da
+ 780 01d4 0B       		.uleb128 0xb
+ 781 01d5 01       		.uleb128 0x1
+ 782 01d6 50       		.byte	0x50
+ 783 01d7 01       		.uleb128 0x1
+ 784 01d8 31       		.byte	0x31
+ 785 01d9 00       		.byte	0
+ 786 01da 0C       		.uleb128 0xc
+ 787 01db 34000000 		.4byte	.LVL9
+ 788 01df 7C070000 		.4byte	0x77c
+ 789 01e3 0A       		.uleb128 0xa
+ 790 01e4 48000000 		.4byte	.LVL10
+ 791 01e8 2E070000 		.4byte	0x72e
+ 792 01ec F6010000 		.4byte	0x1f6
+ 793 01f0 0B       		.uleb128 0xb
+ 794 01f1 01       		.uleb128 0x1
+ 795 01f2 50       		.byte	0x50
+ 796 01f3 01       		.uleb128 0x1
+ 797 01f4 34       		.byte	0x34
+ 798 01f5 00       		.byte	0
+ 799 01f6 0D       		.uleb128 0xd
+ 800 01f7 56000000 		.4byte	.LVL11
+ 801 01fb 44070000 		.4byte	0x744
+ 802 01ff 0B       		.uleb128 0xb
+ 803 0200 01       		.uleb128 0x1
+ 804 0201 52       		.byte	0x52
+ 805 0202 01       		.uleb128 0x1
+ 806 0203 31       		.byte	0x31
+ 807 0204 0B       		.uleb128 0xb
+ 808 0205 01       		.uleb128 0x1
+ 809 0206 51       		.byte	0x51
+ 810 0207 05       		.uleb128 0x5
+ 811 0208 03       		.byte	0x3
+ 812 0209 00000000 		.4byte	pot2Value
+ 813 020d 0B       		.uleb128 0xb
+ 814 020e 01       		.uleb128 0x1
+ 815 020f 50       		.byte	0x50
+ 816 0210 01       		.uleb128 0x1
+ 817 0211 34       		.byte	0x34
+ 818 0212 00       		.byte	0
+ 819 0213 00       		.byte	0
+ 820 0214 0E       		.uleb128 0xe
+ 821 0215 AE000000 		.4byte	.LASF62
+ 822 0219 01       		.byte	0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 19
+
+
+ 823 021a 46       		.byte	0x46
+ 824 021b 68000000 		.4byte	0x68
+ 825 021f 00000000 		.4byte	.LFB65
+ 826 0223 F4010000 		.4byte	.LFE65-.LFB65
+ 827 0227 01       		.uleb128 0x1
+ 828 0228 9C       		.byte	0x9c
+ 829 0229 8C060000 		.4byte	0x68c
+ 830 022d 0F       		.uleb128 0xf
+ 831 022e 16010000 		.4byte	.LASF24
+ 832 0232 01       		.byte	0x1
+ 833 0233 68       		.byte	0x68
+ 834 0234 81000000 		.4byte	0x81
+ 835 0238 01       		.uleb128 0x1
+ 836 0239 56       		.byte	0x56
+ 837 023a 10       		.uleb128 0x10
+ 838 023b 5A000000 		.4byte	.LASF26
+ 839 023f 01       		.byte	0x1
+ 840 0240 69       		.byte	0x69
+ 841 0241 8C060000 		.4byte	0x68c
+ 842 0245 0F       		.uleb128 0xf
+ 843 0246 9A020000 		.4byte	.LASF25
+ 844 024a 01       		.byte	0x1
+ 845 024b 81       		.byte	0x81
+ 846 024c 81000000 		.4byte	0x81
+ 847 0250 01       		.uleb128 0x1
+ 848 0251 55       		.byte	0x55
+ 849 0252 10       		.uleb128 0x10
+ 850 0253 A3000000 		.4byte	.LASF27
+ 851 0257 01       		.byte	0x1
+ 852 0258 82       		.byte	0x82
+ 853 0259 8C060000 		.4byte	0x68c
+ 854 025d 11       		.uleb128 0x11
+ 855 025e 72756E00 		.ascii	"run\000"
+ 856 0262 01       		.byte	0x1
+ 857 0263 91       		.byte	0x91
+ 858 0264 9C060000 		.4byte	0x69c
+ 859 0268 02       		.uleb128 0x2
+ 860 0269 91       		.byte	0x91
+ 861 026a 64       		.sleb128 -28
+ 862 026b 12       		.uleb128 0x12
+ 863 026c 6900     		.ascii	"i\000"
+ 864 026e 01       		.byte	0x1
+ 865 026f 92       		.byte	0x92
+ 866 0270 68000000 		.4byte	0x68
+ 867 0274 00000000 		.4byte	.LLST0
+ 868 0278 12       		.uleb128 0x12
+ 869 0279 6A00     		.ascii	"j\000"
+ 870 027b 01       		.byte	0x1
+ 871 027c 92       		.byte	0x92
+ 872 027d 68000000 		.4byte	0x68
+ 873 0281 1F000000 		.4byte	.LLST1
+ 874 0285 12       		.uleb128 0x12
+ 875 0286 6B00     		.ascii	"k\000"
+ 876 0288 01       		.byte	0x1
+ 877 0289 92       		.byte	0x92
+ 878 028a 68000000 		.4byte	0x68
+ 879 028e 3D000000 		.4byte	.LLST2
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 20
+
+
+ 880 0292 0A       		.uleb128 0xa
+ 881 0293 10000000 		.4byte	.LVL12
+ 882 0297 87070000 		.4byte	0x787
+ 883 029b AA020000 		.4byte	0x2aa
+ 884 029f 0B       		.uleb128 0xb
+ 885 02a0 01       		.uleb128 0x1
+ 886 02a1 51       		.byte	0x51
+ 887 02a2 01       		.uleb128 0x1
+ 888 02a3 31       		.byte	0x31
+ 889 02a4 0B       		.uleb128 0xb
+ 890 02a5 01       		.uleb128 0x1
+ 891 02a6 50       		.byte	0x50
+ 892 02a7 01       		.uleb128 0x1
+ 893 02a8 30       		.byte	0x30
+ 894 02a9 00       		.byte	0
+ 895 02aa 0C       		.uleb128 0xc
+ 896 02ab 14000000 		.4byte	.LVL13
+ 897 02af 9E070000 		.4byte	0x79e
+ 898 02b3 0A       		.uleb128 0xa
+ 899 02b4 1E000000 		.4byte	.LVL14
+ 900 02b8 AA070000 		.4byte	0x7aa
+ 901 02bc C6020000 		.4byte	0x2c6
+ 902 02c0 0B       		.uleb128 0xb
+ 903 02c1 01       		.uleb128 0x1
+ 904 02c2 50       		.byte	0x50
+ 905 02c3 01       		.uleb128 0x1
+ 906 02c4 35       		.byte	0x35
+ 907 02c5 00       		.byte	0
+ 908 02c6 0A       		.uleb128 0xa
+ 909 02c7 24000000 		.4byte	.LVL15
+ 910 02cb BC070000 		.4byte	0x7bc
+ 911 02cf DD020000 		.4byte	0x2dd
+ 912 02d3 0B       		.uleb128 0xb
+ 913 02d4 01       		.uleb128 0x1
+ 914 02d5 50       		.byte	0x50
+ 915 02d6 05       		.uleb128 0x5
+ 916 02d7 03       		.byte	0x3
+ 917 02d8 00000000 		.4byte	ADCDMAISR1
+ 918 02dc 00       		.byte	0
+ 919 02dd 0A       		.uleb128 0xa
+ 920 02de 2A000000 		.4byte	.LVL16
+ 921 02e2 CD070000 		.4byte	0x7cd
+ 922 02e6 F4020000 		.4byte	0x2f4
+ 923 02ea 0B       		.uleb128 0xb
+ 924 02eb 01       		.uleb128 0x1
+ 925 02ec 50       		.byte	0x50
+ 926 02ed 05       		.uleb128 0x5
+ 927 02ee 03       		.byte	0x3
+ 928 02ef 00000000 		.4byte	ADCDMAISR2
+ 929 02f3 00       		.byte	0
+ 930 02f4 0C       		.uleb128 0xc
+ 931 02f5 2E000000 		.4byte	.LVL17
+ 932 02f9 DE070000 		.4byte	0x7de
+ 933 02fd 0C       		.uleb128 0xc
+ 934 02fe 32000000 		.4byte	.LVL18
+ 935 0302 E5070000 		.4byte	0x7e5
+ 936 0306 0C       		.uleb128 0xc
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 21
+
+
+ 937 0307 36000000 		.4byte	.LVL19
+ 938 030b EC070000 		.4byte	0x7ec
+ 939 030f 0C       		.uleb128 0xc
+ 940 0310 3A000000 		.4byte	.LVL20
+ 941 0314 F3070000 		.4byte	0x7f3
+ 942 0318 0C       		.uleb128 0xc
+ 943 0319 3E000000 		.4byte	.LVL21
+ 944 031d FA070000 		.4byte	0x7fa
+ 945 0321 0A       		.uleb128 0xa
+ 946 0322 44000000 		.4byte	.LVL22
+ 947 0326 6B070000 		.4byte	0x76b
+ 948 032a 34030000 		.4byte	0x334
+ 949 032e 0B       		.uleb128 0xb
+ 950 032f 01       		.uleb128 0x1
+ 951 0330 50       		.byte	0x50
+ 952 0331 01       		.uleb128 0x1
+ 953 0332 30       		.byte	0x30
+ 954 0333 00       		.byte	0
+ 955 0334 0C       		.uleb128 0xc
+ 956 0335 48000000 		.4byte	.LVL23
+ 957 0339 01080000 		.4byte	0x801
+ 958 033d 0A       		.uleb128 0xa
+ 959 033e 58000000 		.4byte	.LVL24
+ 960 0342 08080000 		.4byte	0x808
+ 961 0346 63030000 		.4byte	0x363
+ 962 034a 0B       		.uleb128 0xb
+ 963 034b 01       		.uleb128 0x1
+ 964 034c 53       		.byte	0x53
+ 965 034d 03       		.uleb128 0x3
+ 966 034e 0A       		.byte	0xa
+ 967 034f FF1F     		.2byte	0x1fff
+ 968 0351 0B       		.uleb128 0xb
+ 969 0352 01       		.uleb128 0x1
+ 970 0353 52       		.byte	0x52
+ 971 0354 03       		.uleb128 0x3
+ 972 0355 0A       		.byte	0xa
+ 973 0356 0040     		.2byte	0x4000
+ 974 0358 0B       		.uleb128 0xb
+ 975 0359 01       		.uleb128 0x1
+ 976 035a 51       		.byte	0x51
+ 977 035b 01       		.uleb128 0x1
+ 978 035c 31       		.byte	0x31
+ 979 035d 0B       		.uleb128 0xb
+ 980 035e 01       		.uleb128 0x1
+ 981 035f 50       		.byte	0x50
+ 982 0360 01       		.uleb128 0x1
+ 983 0361 31       		.byte	0x31
+ 984 0362 00       		.byte	0
+ 985 0363 0C       		.uleb128 0xc
+ 986 0364 5E000000 		.4byte	.LVL26
+ 987 0368 2C080000 		.4byte	0x82c
+ 988 036c 0C       		.uleb128 0xc
+ 989 036d 64000000 		.4byte	.LVL27
+ 990 0371 2C080000 		.4byte	0x82c
+ 991 0375 0A       		.uleb128 0xa
+ 992 0376 72000000 		.4byte	.LVL28
+ 993 037a 37080000 		.4byte	0x837
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 22
+
+
+ 994 037e 9A030000 		.4byte	0x39a
+ 995 0382 0B       		.uleb128 0xb
+ 996 0383 01       		.uleb128 0x1
+ 997 0384 53       		.byte	0x53
+ 998 0385 01       		.uleb128 0x1
+ 999 0386 36       		.byte	0x36
+ 1000 0387 0B       		.uleb128 0xb
+ 1001 0388 01       		.uleb128 0x1
+ 1002 0389 52       		.byte	0x52
+ 1003 038a 02       		.uleb128 0x2
+ 1004 038b 77       		.byte	0x77
+ 1005 038c 00       		.sleb128 0
+ 1006 038d 0B       		.uleb128 0xb
+ 1007 038e 01       		.uleb128 0x1
+ 1008 038f 51       		.byte	0x51
+ 1009 0390 02       		.uleb128 0x2
+ 1010 0391 08       		.byte	0x8
+ 1011 0392 40       		.byte	0x40
+ 1012 0393 0B       		.uleb128 0xb
+ 1013 0394 01       		.uleb128 0x1
+ 1014 0395 50       		.byte	0x50
+ 1015 0396 02       		.uleb128 0x2
+ 1016 0397 75       		.byte	0x75
+ 1017 0398 00       		.sleb128 0
+ 1018 0399 00       		.byte	0
+ 1019 039a 0A       		.uleb128 0xa
+ 1020 039b 7E000000 		.4byte	.LVL29
+ 1021 039f 37080000 		.4byte	0x837
+ 1022 03a3 BF030000 		.4byte	0x3bf
+ 1023 03a7 0B       		.uleb128 0xb
+ 1024 03a8 01       		.uleb128 0x1
+ 1025 03a9 53       		.byte	0x53
+ 1026 03aa 01       		.uleb128 0x1
+ 1027 03ab 36       		.byte	0x36
+ 1028 03ac 0B       		.uleb128 0xb
+ 1029 03ad 01       		.uleb128 0x1
+ 1030 03ae 52       		.byte	0x52
+ 1031 03af 02       		.uleb128 0x2
+ 1032 03b0 75       		.byte	0x75
+ 1033 03b1 00       		.sleb128 0
+ 1034 03b2 0B       		.uleb128 0xb
+ 1035 03b3 01       		.uleb128 0x1
+ 1036 03b4 51       		.byte	0x51
+ 1037 03b5 02       		.uleb128 0x2
+ 1038 03b6 08       		.byte	0x8
+ 1039 03b7 40       		.byte	0x40
+ 1040 03b8 0B       		.uleb128 0xb
+ 1041 03b9 01       		.uleb128 0x1
+ 1042 03ba 50       		.byte	0x50
+ 1043 03bb 02       		.uleb128 0x2
+ 1044 03bc 77       		.byte	0x77
+ 1045 03bd 00       		.sleb128 0
+ 1046 03be 00       		.byte	0
+ 1047 03bf 0A       		.uleb128 0xa
+ 1048 03c0 8C000000 		.4byte	.LVL30
+ 1049 03c4 5B080000 		.4byte	0x85b
+ 1050 03c8 E0030000 		.4byte	0x3e0
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 23
+
+
+ 1051 03cc 0B       		.uleb128 0xb
+ 1052 03cd 01       		.uleb128 0x1
+ 1053 03ce 52       		.byte	0x52
+ 1054 03cf 02       		.uleb128 0x2
+ 1055 03d0 74       		.byte	0x74
+ 1056 03d1 00       		.sleb128 0
+ 1057 03d2 0B       		.uleb128 0xb
+ 1058 03d3 01       		.uleb128 0x1
+ 1059 03d4 51       		.byte	0x51
+ 1060 03d5 03       		.uleb128 0x3
+ 1061 03d6 0A       		.byte	0xa
+ 1062 03d7 A05B     		.2byte	0x5ba0
+ 1063 03d9 0B       		.uleb128 0xb
+ 1064 03da 01       		.uleb128 0x1
+ 1065 03db 50       		.byte	0x50
+ 1066 03dc 02       		.uleb128 0x2
+ 1067 03dd 75       		.byte	0x75
+ 1068 03de 00       		.sleb128 0
+ 1069 03df 00       		.byte	0
+ 1070 03e0 0A       		.uleb128 0xa
+ 1071 03e1 9C000000 		.4byte	.LVL31
+ 1072 03e5 5B080000 		.4byte	0x85b
+ 1073 03e9 02040000 		.4byte	0x402
+ 1074 03ed 0B       		.uleb128 0xb
+ 1075 03ee 01       		.uleb128 0x1
+ 1076 03ef 52       		.byte	0x52
+ 1077 03f0 03       		.uleb128 0x3
+ 1078 03f1 74       		.byte	0x74
+ 1079 03f2 C000     		.sleb128 64
+ 1080 03f4 0B       		.uleb128 0xb
+ 1081 03f5 01       		.uleb128 0x1
+ 1082 03f6 51       		.byte	0x51
+ 1083 03f7 03       		.uleb128 0x3
+ 1084 03f8 0A       		.byte	0xa
+ 1085 03f9 A05B     		.2byte	0x5ba0
+ 1086 03fb 0B       		.uleb128 0xb
+ 1087 03fc 01       		.uleb128 0x1
+ 1088 03fd 50       		.byte	0x50
+ 1089 03fe 02       		.uleb128 0x2
+ 1090 03ff 77       		.byte	0x77
+ 1091 0400 00       		.sleb128 0
+ 1092 0401 00       		.byte	0
+ 1093 0402 0A       		.uleb128 0xa
+ 1094 0403 A4000000 		.4byte	.LVL32
+ 1095 0407 7A080000 		.4byte	0x87a
+ 1096 040b 1C040000 		.4byte	0x41c
+ 1097 040f 0B       		.uleb128 0xb
+ 1098 0410 01       		.uleb128 0x1
+ 1099 0411 51       		.byte	0x51
+ 1100 0412 02       		.uleb128 0x2
+ 1101 0413 75       		.byte	0x75
+ 1102 0414 00       		.sleb128 0
+ 1103 0415 0B       		.uleb128 0xb
+ 1104 0416 01       		.uleb128 0x1
+ 1105 0417 50       		.byte	0x50
+ 1106 0418 02       		.uleb128 0x2
+ 1107 0419 76       		.byte	0x76
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 24
+
+
+ 1108 041a 00       		.sleb128 0
+ 1109 041b 00       		.byte	0
+ 1110 041c 0A       		.uleb128 0xa
+ 1111 041d AC000000 		.4byte	.LVL33
+ 1112 0421 94080000 		.4byte	0x894
+ 1113 0425 35040000 		.4byte	0x435
+ 1114 0429 0B       		.uleb128 0xb
+ 1115 042a 01       		.uleb128 0x1
+ 1116 042b 51       		.byte	0x51
+ 1117 042c 01       		.uleb128 0x1
+ 1118 042d 31       		.byte	0x31
+ 1119 042e 0B       		.uleb128 0xb
+ 1120 042f 01       		.uleb128 0x1
+ 1121 0430 50       		.byte	0x50
+ 1122 0431 02       		.uleb128 0x2
+ 1123 0432 76       		.byte	0x76
+ 1124 0433 00       		.sleb128 0
+ 1125 0434 00       		.byte	0
+ 1126 0435 0A       		.uleb128 0xa
+ 1127 0436 BC000000 		.4byte	.LVL34
+ 1128 043a AE080000 		.4byte	0x8ae
+ 1129 043e 5B040000 		.4byte	0x45b
+ 1130 0442 0B       		.uleb128 0xb
+ 1131 0443 01       		.uleb128 0x1
+ 1132 0444 53       		.byte	0x53
+ 1133 0445 03       		.uleb128 0x3
+ 1134 0446 0A       		.byte	0xa
+ 1135 0447 FF1F     		.2byte	0x1fff
+ 1136 0449 0B       		.uleb128 0xb
+ 1137 044a 01       		.uleb128 0x1
+ 1138 044b 52       		.byte	0x52
+ 1139 044c 03       		.uleb128 0x3
+ 1140 044d 0A       		.byte	0xa
+ 1141 044e 0040     		.2byte	0x4000
+ 1142 0450 0B       		.uleb128 0xb
+ 1143 0451 01       		.uleb128 0x1
+ 1144 0452 51       		.byte	0x51
+ 1145 0453 01       		.uleb128 0x1
+ 1146 0454 31       		.byte	0x31
+ 1147 0455 0B       		.uleb128 0xb
+ 1148 0456 01       		.uleb128 0x1
+ 1149 0457 50       		.byte	0x50
+ 1150 0458 01       		.uleb128 0x1
+ 1151 0459 31       		.byte	0x31
+ 1152 045a 00       		.byte	0
+ 1153 045b 0C       		.uleb128 0xc
+ 1154 045c C2000000 		.4byte	.LVL36
+ 1155 0460 2C080000 		.4byte	0x82c
+ 1156 0464 0C       		.uleb128 0xc
+ 1157 0465 C8000000 		.4byte	.LVL37
+ 1158 0469 2C080000 		.4byte	0x82c
+ 1159 046d 0A       		.uleb128 0xa
+ 1160 046e D6000000 		.4byte	.LVL38
+ 1161 0472 37080000 		.4byte	0x837
+ 1162 0476 92040000 		.4byte	0x492
+ 1163 047a 0B       		.uleb128 0xb
+ 1164 047b 01       		.uleb128 0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 25
+
+
+ 1165 047c 53       		.byte	0x53
+ 1166 047d 01       		.uleb128 0x1
+ 1167 047e 36       		.byte	0x36
+ 1168 047f 0B       		.uleb128 0xb
+ 1169 0480 01       		.uleb128 0x1
+ 1170 0481 52       		.byte	0x52
+ 1171 0482 02       		.uleb128 0x2
+ 1172 0483 78       		.byte	0x78
+ 1173 0484 00       		.sleb128 0
+ 1174 0485 0B       		.uleb128 0xb
+ 1175 0486 01       		.uleb128 0x1
+ 1176 0487 51       		.byte	0x51
+ 1177 0488 02       		.uleb128 0x2
+ 1178 0489 08       		.byte	0x8
+ 1179 048a 40       		.byte	0x40
+ 1180 048b 0B       		.uleb128 0xb
+ 1181 048c 01       		.uleb128 0x1
+ 1182 048d 50       		.byte	0x50
+ 1183 048e 02       		.uleb128 0x2
+ 1184 048f 77       		.byte	0x77
+ 1185 0490 00       		.sleb128 0
+ 1186 0491 00       		.byte	0
+ 1187 0492 0A       		.uleb128 0xa
+ 1188 0493 E2000000 		.4byte	.LVL39
+ 1189 0497 37080000 		.4byte	0x837
+ 1190 049b B7040000 		.4byte	0x4b7
+ 1191 049f 0B       		.uleb128 0xb
+ 1192 04a0 01       		.uleb128 0x1
+ 1193 04a1 53       		.byte	0x53
+ 1194 04a2 01       		.uleb128 0x1
+ 1195 04a3 36       		.byte	0x36
+ 1196 04a4 0B       		.uleb128 0xb
+ 1197 04a5 01       		.uleb128 0x1
+ 1198 04a6 52       		.byte	0x52
+ 1199 04a7 02       		.uleb128 0x2
+ 1200 04a8 77       		.byte	0x77
+ 1201 04a9 00       		.sleb128 0
+ 1202 04aa 0B       		.uleb128 0xb
+ 1203 04ab 01       		.uleb128 0x1
+ 1204 04ac 51       		.byte	0x51
+ 1205 04ad 02       		.uleb128 0x2
+ 1206 04ae 08       		.byte	0x8
+ 1207 04af 40       		.byte	0x40
+ 1208 04b0 0B       		.uleb128 0xb
+ 1209 04b1 01       		.uleb128 0x1
+ 1210 04b2 50       		.byte	0x50
+ 1211 04b3 02       		.uleb128 0x2
+ 1212 04b4 78       		.byte	0x78
+ 1213 04b5 00       		.sleb128 0
+ 1214 04b6 00       		.byte	0
+ 1215 04b7 0A       		.uleb128 0xa
+ 1216 04b8 F2000000 		.4byte	.LVL40
+ 1217 04bc 5B080000 		.4byte	0x85b
+ 1218 04c0 D9040000 		.4byte	0x4d9
+ 1219 04c4 0B       		.uleb128 0xb
+ 1220 04c5 01       		.uleb128 0x1
+ 1221 04c6 52       		.byte	0x52
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 26
+
+
+ 1222 04c7 03       		.uleb128 0x3
+ 1223 04c8 74       		.byte	0x74
+ 1224 04c9 8001     		.sleb128 128
+ 1225 04cb 0B       		.uleb128 0xb
+ 1226 04cc 01       		.uleb128 0x1
+ 1227 04cd 51       		.byte	0x51
+ 1228 04ce 03       		.uleb128 0x3
+ 1229 04cf 0A       		.byte	0xa
+ 1230 04d0 A25B     		.2byte	0x5ba2
+ 1231 04d2 0B       		.uleb128 0xb
+ 1232 04d3 01       		.uleb128 0x1
+ 1233 04d4 50       		.byte	0x50
+ 1234 04d5 02       		.uleb128 0x2
+ 1235 04d6 77       		.byte	0x77
+ 1236 04d7 00       		.sleb128 0
+ 1237 04d8 00       		.byte	0
+ 1238 04d9 0A       		.uleb128 0xa
+ 1239 04da 02010000 		.4byte	.LVL41
+ 1240 04de 5B080000 		.4byte	0x85b
+ 1241 04e2 FB040000 		.4byte	0x4fb
+ 1242 04e6 0B       		.uleb128 0xb
+ 1243 04e7 01       		.uleb128 0x1
+ 1244 04e8 52       		.byte	0x52
+ 1245 04e9 03       		.uleb128 0x3
+ 1246 04ea 74       		.byte	0x74
+ 1247 04eb C001     		.sleb128 192
+ 1248 04ed 0B       		.uleb128 0xb
+ 1249 04ee 01       		.uleb128 0x1
+ 1250 04ef 51       		.byte	0x51
+ 1251 04f0 03       		.uleb128 0x3
+ 1252 04f1 0A       		.byte	0xa
+ 1253 04f2 A25B     		.2byte	0x5ba2
+ 1254 04f4 0B       		.uleb128 0xb
+ 1255 04f5 01       		.uleb128 0x1
+ 1256 04f6 50       		.byte	0x50
+ 1257 04f7 02       		.uleb128 0x2
+ 1258 04f8 78       		.byte	0x78
+ 1259 04f9 00       		.sleb128 0
+ 1260 04fa 00       		.byte	0
+ 1261 04fb 0A       		.uleb128 0xa
+ 1262 04fc 0A010000 		.4byte	.LVL42
+ 1263 0500 7A080000 		.4byte	0x87a
+ 1264 0504 15050000 		.4byte	0x515
+ 1265 0508 0B       		.uleb128 0xb
+ 1266 0509 01       		.uleb128 0x1
+ 1267 050a 51       		.byte	0x51
+ 1268 050b 02       		.uleb128 0x2
+ 1269 050c 77       		.byte	0x77
+ 1270 050d 00       		.sleb128 0
+ 1271 050e 0B       		.uleb128 0xb
+ 1272 050f 01       		.uleb128 0x1
+ 1273 0510 50       		.byte	0x50
+ 1274 0511 02       		.uleb128 0x2
+ 1275 0512 75       		.byte	0x75
+ 1276 0513 00       		.sleb128 0
+ 1277 0514 00       		.byte	0
+ 1278 0515 0A       		.uleb128 0xa
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 27
+
+
+ 1279 0516 12010000 		.4byte	.LVL43
+ 1280 051a 94080000 		.4byte	0x894
+ 1281 051e 2E050000 		.4byte	0x52e
+ 1282 0522 0B       		.uleb128 0xb
+ 1283 0523 01       		.uleb128 0x1
+ 1284 0524 51       		.byte	0x51
+ 1285 0525 01       		.uleb128 0x1
+ 1286 0526 31       		.byte	0x31
+ 1287 0527 0B       		.uleb128 0xb
+ 1288 0528 01       		.uleb128 0x1
+ 1289 0529 50       		.byte	0x50
+ 1290 052a 02       		.uleb128 0x2
+ 1291 052b 75       		.byte	0x75
+ 1292 052c 00       		.sleb128 0
+ 1293 052d 00       		.byte	0
+ 1294 052e 0A       		.uleb128 0xa
+ 1295 052f 18010000 		.4byte	.LVL44
+ 1296 0533 2E070000 		.4byte	0x72e
+ 1297 0537 41050000 		.4byte	0x541
+ 1298 053b 0B       		.uleb128 0xb
+ 1299 053c 01       		.uleb128 0x1
+ 1300 053d 50       		.byte	0x50
+ 1301 053e 01       		.uleb128 0x1
+ 1302 053f 35       		.byte	0x35
+ 1303 0540 00       		.byte	0
+ 1304 0541 0A       		.uleb128 0xa
+ 1305 0542 24010000 		.4byte	.LVL45
+ 1306 0546 D2080000 		.4byte	0x8d2
+ 1307 054a 5F050000 		.4byte	0x55f
+ 1308 054e 0B       		.uleb128 0xb
+ 1309 054f 01       		.uleb128 0x1
+ 1310 0550 52       		.byte	0x52
+ 1311 0551 01       		.uleb128 0x1
+ 1312 0552 31       		.byte	0x31
+ 1313 0553 0B       		.uleb128 0xb
+ 1314 0554 01       		.uleb128 0x1
+ 1315 0555 51       		.byte	0x51
+ 1316 0556 02       		.uleb128 0x2
+ 1317 0557 91       		.byte	0x91
+ 1318 0558 64       		.sleb128 -28
+ 1319 0559 0B       		.uleb128 0xb
+ 1320 055a 01       		.uleb128 0x1
+ 1321 055b 50       		.byte	0x50
+ 1322 055c 01       		.uleb128 0x1
+ 1323 055d 35       		.byte	0x35
+ 1324 055e 00       		.byte	0
+ 1325 055f 0A       		.uleb128 0xa
+ 1326 0560 34010000 		.4byte	.LVL46
+ 1327 0564 94080000 		.4byte	0x894
+ 1328 0568 78050000 		.4byte	0x578
+ 1329 056c 0B       		.uleb128 0xb
+ 1330 056d 01       		.uleb128 0x1
+ 1331 056e 51       		.byte	0x51
+ 1332 056f 01       		.uleb128 0x1
+ 1333 0570 31       		.byte	0x31
+ 1334 0571 0B       		.uleb128 0xb
+ 1335 0572 01       		.uleb128 0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 28
+
+
+ 1336 0573 50       		.byte	0x50
+ 1337 0574 02       		.uleb128 0x2
+ 1338 0575 75       		.byte	0x75
+ 1339 0576 00       		.sleb128 0
+ 1340 0577 00       		.byte	0
+ 1341 0578 0A       		.uleb128 0xa
+ 1342 0579 3C010000 		.4byte	.LVL47
+ 1343 057d 94080000 		.4byte	0x894
+ 1344 0581 91050000 		.4byte	0x591
+ 1345 0585 0B       		.uleb128 0xb
+ 1346 0586 01       		.uleb128 0x1
+ 1347 0587 51       		.byte	0x51
+ 1348 0588 01       		.uleb128 0x1
+ 1349 0589 31       		.byte	0x31
+ 1350 058a 0B       		.uleb128 0xb
+ 1351 058b 01       		.uleb128 0x1
+ 1352 058c 50       		.byte	0x50
+ 1353 058d 02       		.uleb128 0x2
+ 1354 058e 76       		.byte	0x76
+ 1355 058f 00       		.sleb128 0
+ 1356 0590 00       		.byte	0
+ 1357 0591 0A       		.uleb128 0xa
+ 1358 0592 4E010000 		.4byte	.LVL48
+ 1359 0596 F8080000 		.4byte	0x8f8
+ 1360 059a A5050000 		.4byte	0x5a5
+ 1361 059e 0B       		.uleb128 0xb
+ 1362 059f 01       		.uleb128 0x1
+ 1363 05a0 50       		.byte	0x50
+ 1364 05a1 02       		.uleb128 0x2
+ 1365 05a2 75       		.byte	0x75
+ 1366 05a3 00       		.sleb128 0
+ 1367 05a4 00       		.byte	0
+ 1368 05a5 0A       		.uleb128 0xa
+ 1369 05a6 54010000 		.4byte	.LVL49
+ 1370 05aa F8080000 		.4byte	0x8f8
+ 1371 05ae B9050000 		.4byte	0x5b9
+ 1372 05b2 0B       		.uleb128 0xb
+ 1373 05b3 01       		.uleb128 0x1
+ 1374 05b4 50       		.byte	0x50
+ 1375 05b5 02       		.uleb128 0x2
+ 1376 05b6 76       		.byte	0x76
+ 1377 05b7 00       		.sleb128 0
+ 1378 05b8 00       		.byte	0
+ 1379 05b9 0A       		.uleb128 0xa
+ 1380 05ba 94010000 		.4byte	.LVL59
+ 1381 05be 2E070000 		.4byte	0x72e
+ 1382 05c2 CC050000 		.4byte	0x5cc
+ 1383 05c6 0B       		.uleb128 0xb
+ 1384 05c7 01       		.uleb128 0x1
+ 1385 05c8 50       		.byte	0x50
+ 1386 05c9 01       		.uleb128 0x1
+ 1387 05ca 31       		.byte	0x31
+ 1388 05cb 00       		.byte	0
+ 1389 05cc 0A       		.uleb128 0xa
+ 1390 05cd A0010000 		.4byte	.LVL60
+ 1391 05d1 44070000 		.4byte	0x744
+ 1392 05d5 E9050000 		.4byte	0x5e9
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 29
+
+
+ 1393 05d9 0B       		.uleb128 0xb
+ 1394 05da 01       		.uleb128 0x1
+ 1395 05db 52       		.byte	0x52
+ 1396 05dc 02       		.uleb128 0x2
+ 1397 05dd 08       		.byte	0x8
+ 1398 05de 40       		.byte	0x40
+ 1399 05df 0B       		.uleb128 0xb
+ 1400 05e0 01       		.uleb128 0x1
+ 1401 05e1 51       		.byte	0x51
+ 1402 05e2 05       		.uleb128 0x5
+ 1403 05e3 03       		.byte	0x3
+ 1404 05e4 80000000 		.4byte	source+128
+ 1405 05e8 00       		.byte	0
+ 1406 05e9 0A       		.uleb128 0xa
+ 1407 05ea A6010000 		.4byte	.LVL61
+ 1408 05ee 2E070000 		.4byte	0x72e
+ 1409 05f2 FC050000 		.4byte	0x5fc
+ 1410 05f6 0B       		.uleb128 0xb
+ 1411 05f7 01       		.uleb128 0x1
+ 1412 05f8 50       		.byte	0x50
+ 1413 05f9 01       		.uleb128 0x1
+ 1414 05fa 32       		.byte	0x32
+ 1415 05fb 00       		.byte	0
+ 1416 05fc 0A       		.uleb128 0xa
+ 1417 05fd B4010000 		.4byte	.LVL62
+ 1418 0601 44070000 		.4byte	0x744
+ 1419 0605 1E060000 		.4byte	0x61e
+ 1420 0609 0B       		.uleb128 0xb
+ 1421 060a 01       		.uleb128 0x1
+ 1422 060b 52       		.byte	0x52
+ 1423 060c 02       		.uleb128 0x2
+ 1424 060d 08       		.byte	0x8
+ 1425 060e 40       		.byte	0x40
+ 1426 060f 0B       		.uleb128 0xb
+ 1427 0610 01       		.uleb128 0x1
+ 1428 0611 51       		.byte	0x51
+ 1429 0612 05       		.uleb128 0x5
+ 1430 0613 03       		.byte	0x3
+ 1431 0614 80000000 		.4byte	source+128
+ 1432 0618 0B       		.uleb128 0xb
+ 1433 0619 01       		.uleb128 0x1
+ 1434 061a 50       		.byte	0x50
+ 1435 061b 01       		.uleb128 0x1
+ 1436 061c 32       		.byte	0x32
+ 1437 061d 00       		.byte	0
+ 1438 061e 0C       		.uleb128 0xc
+ 1439 061f B8010000 		.4byte	.LVL63
+ 1440 0623 0D090000 		.4byte	0x90d
+ 1441 0627 0C       		.uleb128 0xc
+ 1442 0628 C0010000 		.4byte	.LVL64
+ 1443 062c 9E070000 		.4byte	0x79e
+ 1444 0630 0A       		.uleb128 0xa
+ 1445 0631 CA010000 		.4byte	.LVL65
+ 1446 0635 AA070000 		.4byte	0x7aa
+ 1447 0639 43060000 		.4byte	0x643
+ 1448 063d 0B       		.uleb128 0xb
+ 1449 063e 01       		.uleb128 0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 30
+
+
+ 1450 063f 50       		.byte	0x50
+ 1451 0640 01       		.uleb128 0x1
+ 1452 0641 31       		.byte	0x31
+ 1453 0642 00       		.byte	0
+ 1454 0643 0A       		.uleb128 0xa
+ 1455 0644 D0010000 		.4byte	.LVL66
+ 1456 0648 AA070000 		.4byte	0x7aa
+ 1457 064c 56060000 		.4byte	0x656
+ 1458 0650 0B       		.uleb128 0xb
+ 1459 0651 01       		.uleb128 0x1
+ 1460 0652 50       		.byte	0x50
+ 1461 0653 01       		.uleb128 0x1
+ 1462 0654 32       		.byte	0x32
+ 1463 0655 00       		.byte	0
+ 1464 0656 0A       		.uleb128 0xa
+ 1465 0657 D6010000 		.4byte	.LVL67
+ 1466 065b AA070000 		.4byte	0x7aa
+ 1467 065f 69060000 		.4byte	0x669
+ 1468 0663 0B       		.uleb128 0xb
+ 1469 0664 01       		.uleb128 0x1
+ 1470 0665 50       		.byte	0x50
+ 1471 0666 01       		.uleb128 0x1
+ 1472 0667 33       		.byte	0x33
+ 1473 0668 00       		.byte	0
+ 1474 0669 0A       		.uleb128 0xa
+ 1475 066a DC010000 		.4byte	.LVL68
+ 1476 066e AA070000 		.4byte	0x7aa
+ 1477 0672 7C060000 		.4byte	0x67c
+ 1478 0676 0B       		.uleb128 0xb
+ 1479 0677 01       		.uleb128 0x1
+ 1480 0678 50       		.byte	0x50
+ 1481 0679 01       		.uleb128 0x1
+ 1482 067a 34       		.byte	0x34
+ 1483 067b 00       		.byte	0
+ 1484 067c 0D       		.uleb128 0xd
+ 1485 067d E2010000 		.4byte	.LVL69
+ 1486 0681 AA070000 		.4byte	0x7aa
+ 1487 0685 0B       		.uleb128 0xb
+ 1488 0686 01       		.uleb128 0x1
+ 1489 0687 50       		.byte	0x50
+ 1490 0688 01       		.uleb128 0x1
+ 1491 0689 35       		.byte	0x35
+ 1492 068a 00       		.byte	0
+ 1493 068b 00       		.byte	0
+ 1494 068c 13       		.uleb128 0x13
+ 1495 068d 81000000 		.4byte	0x81
+ 1496 0691 9C060000 		.4byte	0x69c
+ 1497 0695 14       		.uleb128 0x14
+ 1498 0696 F6000000 		.4byte	0xf6
+ 1499 069a 01       		.byte	0x1
+ 1500 069b 00       		.byte	0
+ 1501 069c 13       		.uleb128 0x13
+ 1502 069d 81000000 		.4byte	0x81
+ 1503 06a1 AC060000 		.4byte	0x6ac
+ 1504 06a5 14       		.uleb128 0x14
+ 1505 06a6 F6000000 		.4byte	0xf6
+ 1506 06aa 00       		.byte	0
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 31
+
+
+ 1507 06ab 00       		.byte	0
+ 1508 06ac 15       		.uleb128 0x15
+ 1509 06ad 08040000 		.4byte	.LASF28
+ 1510 06b1 05       		.byte	0x5
+ 1511 06b2 9606     		.2byte	0x696
+ 1512 06b4 B8060000 		.4byte	0x6b8
+ 1513 06b8 06       		.uleb128 0x6
+ 1514 06b9 76000000 		.4byte	0x76
+ 1515 06bd 13       		.uleb128 0x13
+ 1516 06be 81000000 		.4byte	0x81
+ 1517 06c2 D9060000 		.4byte	0x6d9
+ 1518 06c6 14       		.uleb128 0x14
+ 1519 06c7 F6000000 		.4byte	0xf6
+ 1520 06cb 01       		.byte	0x1
+ 1521 06cc 14       		.uleb128 0x14
+ 1522 06cd F6000000 		.4byte	0xf6
+ 1523 06d1 01       		.byte	0x1
+ 1524 06d2 14       		.uleb128 0x14
+ 1525 06d3 F6000000 		.4byte	0xf6
+ 1526 06d7 3F       		.byte	0x3f
+ 1527 06d8 00       		.byte	0
+ 1528 06d9 16       		.uleb128 0x16
+ 1529 06da 4C010000 		.4byte	.LASF29
+ 1530 06de 01       		.byte	0x1
+ 1531 06df 0E       		.byte	0xe
+ 1532 06e0 BD060000 		.4byte	0x6bd
+ 1533 06e4 05       		.uleb128 0x5
+ 1534 06e5 03       		.byte	0x3
+ 1535 06e6 00000000 		.4byte	source
+ 1536 06ea 16       		.uleb128 0x16
+ 1537 06eb F1030000 		.4byte	.LASF30
+ 1538 06ef 01       		.byte	0x1
+ 1539 06f0 0F       		.byte	0xf
+ 1540 06f1 68000000 		.4byte	0x68
+ 1541 06f5 05       		.uleb128 0x5
+ 1542 06f6 03       		.byte	0x3
+ 1543 06f7 00000000 		.4byte	probe1TXTD
+ 1544 06fb 16       		.uleb128 0x16
+ 1545 06fc E1000000 		.4byte	.LASF31
+ 1546 0700 01       		.byte	0x1
+ 1547 0701 10       		.byte	0x10
+ 1548 0702 68000000 		.4byte	0x68
+ 1549 0706 05       		.uleb128 0x5
+ 1550 0707 03       		.byte	0x3
+ 1551 0708 00000000 		.4byte	probe2TXTD
+ 1552 070c 16       		.uleb128 0x16
+ 1553 070d 0C030000 		.4byte	.LASF32
+ 1554 0711 01       		.byte	0x1
+ 1555 0712 11       		.byte	0x11
+ 1556 0713 9C060000 		.4byte	0x69c
+ 1557 0717 05       		.uleb128 0x5
+ 1558 0718 03       		.byte	0x3
+ 1559 0719 00000000 		.4byte	pot1Value
+ 1560 071d 16       		.uleb128 0x16
+ 1561 071e 20000000 		.4byte	.LASF33
+ 1562 0722 01       		.byte	0x1
+ 1563 0723 12       		.byte	0x12
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 32
+
+
+ 1564 0724 9C060000 		.4byte	0x69c
+ 1565 0728 05       		.uleb128 0x5
+ 1566 0729 03       		.byte	0x3
+ 1567 072a 00000000 		.4byte	pot2Value
+ 1568 072e 17       		.uleb128 0x17
+ 1569 072f 3B010000 		.4byte	.LASF48
+ 1570 0733 06       		.byte	0x6
+ 1571 0734 2B01     		.2byte	0x12b
+ 1572 0736 81000000 		.4byte	0x81
+ 1573 073a 44070000 		.4byte	0x744
+ 1574 073e 18       		.uleb128 0x18
+ 1575 073f 81000000 		.4byte	0x81
+ 1576 0743 00       		.byte	0
+ 1577 0744 19       		.uleb128 0x19
+ 1578 0745 FD020000 		.4byte	.LASF34
+ 1579 0749 06       		.byte	0x6
+ 1580 074a 2D01     		.2byte	0x12d
+ 1581 074c 60070000 		.4byte	0x760
+ 1582 0750 18       		.uleb128 0x18
+ 1583 0751 81000000 		.4byte	0x81
+ 1584 0755 18       		.uleb128 0x18
+ 1585 0756 60070000 		.4byte	0x760
+ 1586 075a 18       		.uleb128 0x18
+ 1587 075b 8D000000 		.4byte	0x8d
+ 1588 075f 00       		.byte	0
+ 1589 0760 07       		.uleb128 0x7
+ 1590 0761 04       		.byte	0x4
+ 1591 0762 66070000 		.4byte	0x766
+ 1592 0766 1A       		.uleb128 0x1a
+ 1593 0767 81000000 		.4byte	0x81
+ 1594 076b 1B       		.uleb128 0x1b
+ 1595 076c 21010000 		.4byte	.LASF35
+ 1596 0770 07       		.byte	0x7
+ 1597 0771 50       		.byte	0x50
+ 1598 0772 7C070000 		.4byte	0x77c
+ 1599 0776 18       		.uleb128 0x18
+ 1600 0777 81000000 		.4byte	0x81
+ 1601 077b 00       		.byte	0
+ 1602 077c 1C       		.uleb128 0x1c
+ 1603 077d EB020000 		.4byte	.LASF37
+ 1604 0781 08       		.byte	0x8
+ 1605 0782 55       		.byte	0x55
+ 1606 0783 A5000000 		.4byte	0xa5
+ 1607 0787 19       		.uleb128 0x19
+ 1608 0788 FC030000 		.4byte	.LASF36
+ 1609 078c 06       		.byte	0x6
+ 1610 078d 2501     		.2byte	0x125
+ 1611 078f 9E070000 		.4byte	0x79e
+ 1612 0793 18       		.uleb128 0x18
+ 1613 0794 81000000 		.4byte	0x81
+ 1614 0798 18       		.uleb128 0x18
+ 1615 0799 81000000 		.4byte	0x81
+ 1616 079d 00       		.byte	0
+ 1617 079e 1D       		.uleb128 0x1d
+ 1618 079f 53010000 		.4byte	.LASF38
+ 1619 07a3 06       		.byte	0x6
+ 1620 07a4 2801     		.2byte	0x128
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 33
+
+
+ 1621 07a6 81000000 		.4byte	0x81
+ 1622 07aa 19       		.uleb128 0x19
+ 1623 07ab D9020000 		.4byte	.LASF39
+ 1624 07af 06       		.byte	0x6
+ 1625 07b0 3101     		.2byte	0x131
+ 1626 07b2 BC070000 		.4byte	0x7bc
+ 1627 07b6 18       		.uleb128 0x18
+ 1628 07b7 81000000 		.4byte	0x81
+ 1629 07bb 00       		.byte	0
+ 1630 07bc 1B       		.uleb128 0x1b
+ 1631 07bd 15040000 		.4byte	.LASF40
+ 1632 07c1 09       		.byte	0x9
+ 1633 07c2 18       		.byte	0x18
+ 1634 07c3 CD070000 		.4byte	0x7cd
+ 1635 07c7 18       		.uleb128 0x18
+ 1636 07c8 E3000000 		.4byte	0xe3
+ 1637 07cc 00       		.byte	0
+ 1638 07cd 1B       		.uleb128 0x1b
+ 1639 07ce 10000000 		.4byte	.LASF41
+ 1640 07d2 0A       		.byte	0xa
+ 1641 07d3 18       		.byte	0x18
+ 1642 07d4 DE070000 		.4byte	0x7de
+ 1643 07d8 18       		.uleb128 0x18
+ 1644 07d9 E3000000 		.4byte	0xe3
+ 1645 07dd 00       		.byte	0
+ 1646 07de 1E       		.uleb128 0x1e
+ 1647 07df 2A000000 		.4byte	.LASF42
+ 1648 07e3 0B       		.byte	0xb
+ 1649 07e4 34       		.byte	0x34
+ 1650 07e5 1E       		.uleb128 0x1e
+ 1651 07e6 7B020000 		.4byte	.LASF43
+ 1652 07ea 0B       		.byte	0xb
+ 1653 07eb D1       		.byte	0xd1
+ 1654 07ec 1E       		.uleb128 0x1e
+ 1655 07ed 4A020000 		.4byte	.LASF44
+ 1656 07f1 0C       		.byte	0xc
+ 1657 07f2 34       		.byte	0x34
+ 1658 07f3 1E       		.uleb128 0x1e
+ 1659 07f4 E2010000 		.4byte	.LASF45
+ 1660 07f8 0C       		.byte	0xc
+ 1661 07f9 D1       		.byte	0xd1
+ 1662 07fa 1E       		.uleb128 0x1e
+ 1663 07fb AE030000 		.4byte	.LASF46
+ 1664 07ff 07       		.byte	0x7
+ 1665 0800 1E       		.byte	0x1e
+ 1666 0801 1E       		.uleb128 0x1e
+ 1667 0802 92000000 		.4byte	.LASF47
+ 1668 0806 08       		.byte	0x8
+ 1669 0807 3A       		.byte	0x3a
+ 1670 0808 1F       		.uleb128 0x1f
+ 1671 0809 3A000000 		.4byte	.LASF49
+ 1672 080d 0D       		.byte	0xd
+ 1673 080e 1E       		.byte	0x1e
+ 1674 080f 81000000 		.4byte	0x81
+ 1675 0813 2C080000 		.4byte	0x82c
+ 1676 0817 18       		.uleb128 0x18
+ 1677 0818 81000000 		.4byte	0x81
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 34
+
+
+ 1678 081c 18       		.uleb128 0x18
+ 1679 081d 81000000 		.4byte	0x81
+ 1680 0821 18       		.uleb128 0x18
+ 1681 0822 8D000000 		.4byte	0x8d
+ 1682 0826 18       		.uleb128 0x18
+ 1683 0827 8D000000 		.4byte	0x8d
+ 1684 082b 00       		.byte	0
+ 1685 082c 1C       		.uleb128 0x1c
+ 1686 082d 00000000 		.4byte	.LASF50
+ 1687 0831 0E       		.byte	0xe
+ 1688 0832 38       		.byte	0x38
+ 1689 0833 81000000 		.4byte	0x81
+ 1690 0837 1F       		.uleb128 0x1f
+ 1691 0838 63000000 		.4byte	.LASF51
+ 1692 083c 0E       		.byte	0xe
+ 1693 083d 3B       		.byte	0x3b
+ 1694 083e C6000000 		.4byte	0xc6
+ 1695 0842 5B080000 		.4byte	0x85b
+ 1696 0846 18       		.uleb128 0x18
+ 1697 0847 81000000 		.4byte	0x81
+ 1698 084b 18       		.uleb128 0x18
+ 1699 084c 8D000000 		.4byte	0x8d
+ 1700 0850 18       		.uleb128 0x18
+ 1701 0851 81000000 		.4byte	0x81
+ 1702 0855 18       		.uleb128 0x18
+ 1703 0856 81000000 		.4byte	0x81
+ 1704 085a 00       		.byte	0
+ 1705 085b 1F       		.uleb128 0x1f
+ 1706 085c 29020000 		.4byte	.LASF52
+ 1707 0860 0E       		.byte	0xe
+ 1708 0861 3F       		.byte	0x3f
+ 1709 0862 C6000000 		.4byte	0xc6
+ 1710 0866 7A080000 		.4byte	0x87a
+ 1711 086a 18       		.uleb128 0x18
+ 1712 086b 81000000 		.4byte	0x81
+ 1713 086f 18       		.uleb128 0x18
+ 1714 0870 8D000000 		.4byte	0x8d
+ 1715 0874 18       		.uleb128 0x18
+ 1716 0875 8D000000 		.4byte	0x8d
+ 1717 0879 00       		.byte	0
+ 1718 087a 1F       		.uleb128 0x1f
+ 1719 087b C0000000 		.4byte	.LASF53
+ 1720 087f 0E       		.byte	0xe
+ 1721 0880 2F       		.byte	0x2f
+ 1722 0881 C6000000 		.4byte	0xc6
+ 1723 0885 94080000 		.4byte	0x894
+ 1724 0889 18       		.uleb128 0x18
+ 1725 088a 81000000 		.4byte	0x81
+ 1726 088e 18       		.uleb128 0x18
+ 1727 088f 81000000 		.4byte	0x81
+ 1728 0893 00       		.byte	0
+ 1729 0894 1F       		.uleb128 0x1f
+ 1730 0895 7B000000 		.4byte	.LASF54
+ 1731 0899 0E       		.byte	0xe
+ 1732 089a 29       		.byte	0x29
+ 1733 089b C6000000 		.4byte	0xc6
+ 1734 089f AE080000 		.4byte	0x8ae
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 35
+
+
+ 1735 08a3 18       		.uleb128 0x18
+ 1736 08a4 81000000 		.4byte	0x81
+ 1737 08a8 18       		.uleb128 0x18
+ 1738 08a9 81000000 		.4byte	0x81
+ 1739 08ad 00       		.byte	0
+ 1740 08ae 1F       		.uleb128 0x1f
+ 1741 08af F2000000 		.4byte	.LASF55
+ 1742 08b3 0F       		.byte	0xf
+ 1743 08b4 1E       		.byte	0x1e
+ 1744 08b5 81000000 		.4byte	0x81
+ 1745 08b9 D2080000 		.4byte	0x8d2
+ 1746 08bd 18       		.uleb128 0x18
+ 1747 08be 81000000 		.4byte	0x81
+ 1748 08c2 18       		.uleb128 0x18
+ 1749 08c3 81000000 		.4byte	0x81
+ 1750 08c7 18       		.uleb128 0x18
+ 1751 08c8 8D000000 		.4byte	0x8d
+ 1752 08cc 18       		.uleb128 0x18
+ 1753 08cd 8D000000 		.4byte	0x8d
+ 1754 08d1 00       		.byte	0
+ 1755 08d2 17       		.uleb128 0x17
+ 1756 08d3 78010000 		.4byte	.LASF56
+ 1757 08d7 06       		.byte	0x6
+ 1758 08d8 2F01     		.2byte	0x12f
+ 1759 08da 8D000000 		.4byte	0x8d
+ 1760 08de F2080000 		.4byte	0x8f2
+ 1761 08e2 18       		.uleb128 0x18
+ 1762 08e3 81000000 		.4byte	0x81
+ 1763 08e7 18       		.uleb128 0x18
+ 1764 08e8 F2080000 		.4byte	0x8f2
+ 1765 08ec 18       		.uleb128 0x18
+ 1766 08ed 8D000000 		.4byte	0x8d
+ 1767 08f1 00       		.byte	0
+ 1768 08f2 07       		.uleb128 0x7
+ 1769 08f3 04       		.byte	0x4
+ 1770 08f4 81000000 		.4byte	0x81
+ 1771 08f8 1F       		.uleb128 0x1f
+ 1772 08f9 3B020000 		.4byte	.LASF57
+ 1773 08fd 0E       		.byte	0xe
+ 1774 08fe 2A       		.byte	0x2a
+ 1775 08ff C6000000 		.4byte	0xc6
+ 1776 0903 0D090000 		.4byte	0x90d
+ 1777 0907 18       		.uleb128 0x18
+ 1778 0908 81000000 		.4byte	0x81
+ 1779 090c 00       		.byte	0
+ 1780 090d 1D       		.uleb128 0x1d
+ 1781 090e BE030000 		.4byte	.LASF58
+ 1782 0912 06       		.byte	0x6
+ 1783 0913 2901     		.2byte	0x129
+ 1784 0915 81000000 		.4byte	0x81
+ 1785 0919 00       		.byte	0
+ 1786              		.section	.debug_abbrev,"",%progbits
+ 1787              	.Ldebug_abbrev0:
+ 1788 0000 01       		.uleb128 0x1
+ 1789 0001 11       		.uleb128 0x11
+ 1790 0002 01       		.byte	0x1
+ 1791 0003 25       		.uleb128 0x25
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 36
+
+
+ 1792 0004 0E       		.uleb128 0xe
+ 1793 0005 13       		.uleb128 0x13
+ 1794 0006 0B       		.uleb128 0xb
+ 1795 0007 03       		.uleb128 0x3
+ 1796 0008 0E       		.uleb128 0xe
+ 1797 0009 1B       		.uleb128 0x1b
+ 1798 000a 0E       		.uleb128 0xe
+ 1799 000b 55       		.uleb128 0x55
+ 1800 000c 17       		.uleb128 0x17
+ 1801 000d 11       		.uleb128 0x11
+ 1802 000e 01       		.uleb128 0x1
+ 1803 000f 10       		.uleb128 0x10
+ 1804 0010 17       		.uleb128 0x17
+ 1805 0011 00       		.byte	0
+ 1806 0012 00       		.byte	0
+ 1807 0013 02       		.uleb128 0x2
+ 1808 0014 24       		.uleb128 0x24
+ 1809 0015 00       		.byte	0
+ 1810 0016 0B       		.uleb128 0xb
+ 1811 0017 0B       		.uleb128 0xb
+ 1812 0018 3E       		.uleb128 0x3e
+ 1813 0019 0B       		.uleb128 0xb
+ 1814 001a 03       		.uleb128 0x3
+ 1815 001b 0E       		.uleb128 0xe
+ 1816 001c 00       		.byte	0
+ 1817 001d 00       		.byte	0
+ 1818 001e 03       		.uleb128 0x3
+ 1819 001f 16       		.uleb128 0x16
+ 1820 0020 00       		.byte	0
+ 1821 0021 03       		.uleb128 0x3
+ 1822 0022 0E       		.uleb128 0xe
+ 1823 0023 3A       		.uleb128 0x3a
+ 1824 0024 0B       		.uleb128 0xb
+ 1825 0025 3B       		.uleb128 0x3b
+ 1826 0026 0B       		.uleb128 0xb
+ 1827 0027 49       		.uleb128 0x49
+ 1828 0028 13       		.uleb128 0x13
+ 1829 0029 00       		.byte	0
+ 1830 002a 00       		.byte	0
+ 1831 002b 04       		.uleb128 0x4
+ 1832 002c 24       		.uleb128 0x24
+ 1833 002d 00       		.byte	0
+ 1834 002e 0B       		.uleb128 0xb
+ 1835 002f 0B       		.uleb128 0xb
+ 1836 0030 3E       		.uleb128 0x3e
+ 1837 0031 0B       		.uleb128 0xb
+ 1838 0032 03       		.uleb128 0x3
+ 1839 0033 08       		.uleb128 0x8
+ 1840 0034 00       		.byte	0
+ 1841 0035 00       		.byte	0
+ 1842 0036 05       		.uleb128 0x5
+ 1843 0037 16       		.uleb128 0x16
+ 1844 0038 00       		.byte	0
+ 1845 0039 03       		.uleb128 0x3
+ 1846 003a 0E       		.uleb128 0xe
+ 1847 003b 3A       		.uleb128 0x3a
+ 1848 003c 0B       		.uleb128 0xb
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 37
+
+
+ 1849 003d 3B       		.uleb128 0x3b
+ 1850 003e 05       		.uleb128 0x5
+ 1851 003f 49       		.uleb128 0x49
+ 1852 0040 13       		.uleb128 0x13
+ 1853 0041 00       		.byte	0
+ 1854 0042 00       		.byte	0
+ 1855 0043 06       		.uleb128 0x6
+ 1856 0044 35       		.uleb128 0x35
+ 1857 0045 00       		.byte	0
+ 1858 0046 49       		.uleb128 0x49
+ 1859 0047 13       		.uleb128 0x13
+ 1860 0048 00       		.byte	0
+ 1861 0049 00       		.byte	0
+ 1862 004a 07       		.uleb128 0x7
+ 1863 004b 0F       		.uleb128 0xf
+ 1864 004c 00       		.byte	0
+ 1865 004d 0B       		.uleb128 0xb
+ 1866 004e 0B       		.uleb128 0xb
+ 1867 004f 49       		.uleb128 0x49
+ 1868 0050 13       		.uleb128 0x13
+ 1869 0051 00       		.byte	0
+ 1870 0052 00       		.byte	0
+ 1871 0053 08       		.uleb128 0x8
+ 1872 0054 15       		.uleb128 0x15
+ 1873 0055 00       		.byte	0
+ 1874 0056 27       		.uleb128 0x27
+ 1875 0057 19       		.uleb128 0x19
+ 1876 0058 00       		.byte	0
+ 1877 0059 00       		.byte	0
+ 1878 005a 09       		.uleb128 0x9
+ 1879 005b 2E       		.uleb128 0x2e
+ 1880 005c 01       		.byte	0x1
+ 1881 005d 3F       		.uleb128 0x3f
+ 1882 005e 19       		.uleb128 0x19
+ 1883 005f 03       		.uleb128 0x3
+ 1884 0060 0E       		.uleb128 0xe
+ 1885 0061 3A       		.uleb128 0x3a
+ 1886 0062 0B       		.uleb128 0xb
+ 1887 0063 3B       		.uleb128 0x3b
+ 1888 0064 0B       		.uleb128 0xb
+ 1889 0065 27       		.uleb128 0x27
+ 1890 0066 19       		.uleb128 0x19
+ 1891 0067 11       		.uleb128 0x11
+ 1892 0068 01       		.uleb128 0x1
+ 1893 0069 12       		.uleb128 0x12
+ 1894 006a 06       		.uleb128 0x6
+ 1895 006b 40       		.uleb128 0x40
+ 1896 006c 18       		.uleb128 0x18
+ 1897 006d 9742     		.uleb128 0x2117
+ 1898 006f 19       		.uleb128 0x19
+ 1899 0070 01       		.uleb128 0x1
+ 1900 0071 13       		.uleb128 0x13
+ 1901 0072 00       		.byte	0
+ 1902 0073 00       		.byte	0
+ 1903 0074 0A       		.uleb128 0xa
+ 1904 0075 898201   		.uleb128 0x4109
+ 1905 0078 01       		.byte	0x1
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 38
+
+
+ 1906 0079 11       		.uleb128 0x11
+ 1907 007a 01       		.uleb128 0x1
+ 1908 007b 31       		.uleb128 0x31
+ 1909 007c 13       		.uleb128 0x13
+ 1910 007d 01       		.uleb128 0x1
+ 1911 007e 13       		.uleb128 0x13
+ 1912 007f 00       		.byte	0
+ 1913 0080 00       		.byte	0
+ 1914 0081 0B       		.uleb128 0xb
+ 1915 0082 8A8201   		.uleb128 0x410a
+ 1916 0085 00       		.byte	0
+ 1917 0086 02       		.uleb128 0x2
+ 1918 0087 18       		.uleb128 0x18
+ 1919 0088 9142     		.uleb128 0x2111
+ 1920 008a 18       		.uleb128 0x18
+ 1921 008b 00       		.byte	0
+ 1922 008c 00       		.byte	0
+ 1923 008d 0C       		.uleb128 0xc
+ 1924 008e 898201   		.uleb128 0x4109
+ 1925 0091 00       		.byte	0
+ 1926 0092 11       		.uleb128 0x11
+ 1927 0093 01       		.uleb128 0x1
+ 1928 0094 31       		.uleb128 0x31
+ 1929 0095 13       		.uleb128 0x13
+ 1930 0096 00       		.byte	0
+ 1931 0097 00       		.byte	0
+ 1932 0098 0D       		.uleb128 0xd
+ 1933 0099 898201   		.uleb128 0x4109
+ 1934 009c 01       		.byte	0x1
+ 1935 009d 11       		.uleb128 0x11
+ 1936 009e 01       		.uleb128 0x1
+ 1937 009f 31       		.uleb128 0x31
+ 1938 00a0 13       		.uleb128 0x13
+ 1939 00a1 00       		.byte	0
+ 1940 00a2 00       		.byte	0
+ 1941 00a3 0E       		.uleb128 0xe
+ 1942 00a4 2E       		.uleb128 0x2e
+ 1943 00a5 01       		.byte	0x1
+ 1944 00a6 3F       		.uleb128 0x3f
+ 1945 00a7 19       		.uleb128 0x19
+ 1946 00a8 03       		.uleb128 0x3
+ 1947 00a9 0E       		.uleb128 0xe
+ 1948 00aa 3A       		.uleb128 0x3a
+ 1949 00ab 0B       		.uleb128 0xb
+ 1950 00ac 3B       		.uleb128 0x3b
+ 1951 00ad 0B       		.uleb128 0xb
+ 1952 00ae 27       		.uleb128 0x27
+ 1953 00af 19       		.uleb128 0x19
+ 1954 00b0 49       		.uleb128 0x49
+ 1955 00b1 13       		.uleb128 0x13
+ 1956 00b2 11       		.uleb128 0x11
+ 1957 00b3 01       		.uleb128 0x1
+ 1958 00b4 12       		.uleb128 0x12
+ 1959 00b5 06       		.uleb128 0x6
+ 1960 00b6 40       		.uleb128 0x40
+ 1961 00b7 18       		.uleb128 0x18
+ 1962 00b8 9742     		.uleb128 0x2117
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 39
+
+
+ 1963 00ba 19       		.uleb128 0x19
+ 1964 00bb 01       		.uleb128 0x1
+ 1965 00bc 13       		.uleb128 0x13
+ 1966 00bd 00       		.byte	0
+ 1967 00be 00       		.byte	0
+ 1968 00bf 0F       		.uleb128 0xf
+ 1969 00c0 34       		.uleb128 0x34
+ 1970 00c1 00       		.byte	0
+ 1971 00c2 03       		.uleb128 0x3
+ 1972 00c3 0E       		.uleb128 0xe
+ 1973 00c4 3A       		.uleb128 0x3a
+ 1974 00c5 0B       		.uleb128 0xb
+ 1975 00c6 3B       		.uleb128 0x3b
+ 1976 00c7 0B       		.uleb128 0xb
+ 1977 00c8 49       		.uleb128 0x49
+ 1978 00c9 13       		.uleb128 0x13
+ 1979 00ca 02       		.uleb128 0x2
+ 1980 00cb 18       		.uleb128 0x18
+ 1981 00cc 00       		.byte	0
+ 1982 00cd 00       		.byte	0
+ 1983 00ce 10       		.uleb128 0x10
+ 1984 00cf 34       		.uleb128 0x34
+ 1985 00d0 00       		.byte	0
+ 1986 00d1 03       		.uleb128 0x3
+ 1987 00d2 0E       		.uleb128 0xe
+ 1988 00d3 3A       		.uleb128 0x3a
+ 1989 00d4 0B       		.uleb128 0xb
+ 1990 00d5 3B       		.uleb128 0x3b
+ 1991 00d6 0B       		.uleb128 0xb
+ 1992 00d7 49       		.uleb128 0x49
+ 1993 00d8 13       		.uleb128 0x13
+ 1994 00d9 00       		.byte	0
+ 1995 00da 00       		.byte	0
+ 1996 00db 11       		.uleb128 0x11
+ 1997 00dc 34       		.uleb128 0x34
+ 1998 00dd 00       		.byte	0
+ 1999 00de 03       		.uleb128 0x3
+ 2000 00df 08       		.uleb128 0x8
+ 2001 00e0 3A       		.uleb128 0x3a
+ 2002 00e1 0B       		.uleb128 0xb
+ 2003 00e2 3B       		.uleb128 0x3b
+ 2004 00e3 0B       		.uleb128 0xb
+ 2005 00e4 49       		.uleb128 0x49
+ 2006 00e5 13       		.uleb128 0x13
+ 2007 00e6 02       		.uleb128 0x2
+ 2008 00e7 18       		.uleb128 0x18
+ 2009 00e8 00       		.byte	0
+ 2010 00e9 00       		.byte	0
+ 2011 00ea 12       		.uleb128 0x12
+ 2012 00eb 34       		.uleb128 0x34
+ 2013 00ec 00       		.byte	0
+ 2014 00ed 03       		.uleb128 0x3
+ 2015 00ee 08       		.uleb128 0x8
+ 2016 00ef 3A       		.uleb128 0x3a
+ 2017 00f0 0B       		.uleb128 0xb
+ 2018 00f1 3B       		.uleb128 0x3b
+ 2019 00f2 0B       		.uleb128 0xb
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 40
+
+
+ 2020 00f3 49       		.uleb128 0x49
+ 2021 00f4 13       		.uleb128 0x13
+ 2022 00f5 02       		.uleb128 0x2
+ 2023 00f6 17       		.uleb128 0x17
+ 2024 00f7 00       		.byte	0
+ 2025 00f8 00       		.byte	0
+ 2026 00f9 13       		.uleb128 0x13
+ 2027 00fa 01       		.uleb128 0x1
+ 2028 00fb 01       		.byte	0x1
+ 2029 00fc 49       		.uleb128 0x49
+ 2030 00fd 13       		.uleb128 0x13
+ 2031 00fe 01       		.uleb128 0x1
+ 2032 00ff 13       		.uleb128 0x13
+ 2033 0100 00       		.byte	0
+ 2034 0101 00       		.byte	0
+ 2035 0102 14       		.uleb128 0x14
+ 2036 0103 21       		.uleb128 0x21
+ 2037 0104 00       		.byte	0
+ 2038 0105 49       		.uleb128 0x49
+ 2039 0106 13       		.uleb128 0x13
+ 2040 0107 2F       		.uleb128 0x2f
+ 2041 0108 0B       		.uleb128 0xb
+ 2042 0109 00       		.byte	0
+ 2043 010a 00       		.byte	0
+ 2044 010b 15       		.uleb128 0x15
+ 2045 010c 34       		.uleb128 0x34
+ 2046 010d 00       		.byte	0
+ 2047 010e 03       		.uleb128 0x3
+ 2048 010f 0E       		.uleb128 0xe
+ 2049 0110 3A       		.uleb128 0x3a
+ 2050 0111 0B       		.uleb128 0xb
+ 2051 0112 3B       		.uleb128 0x3b
+ 2052 0113 05       		.uleb128 0x5
+ 2053 0114 49       		.uleb128 0x49
+ 2054 0115 13       		.uleb128 0x13
+ 2055 0116 3F       		.uleb128 0x3f
+ 2056 0117 19       		.uleb128 0x19
+ 2057 0118 3C       		.uleb128 0x3c
+ 2058 0119 19       		.uleb128 0x19
+ 2059 011a 00       		.byte	0
+ 2060 011b 00       		.byte	0
+ 2061 011c 16       		.uleb128 0x16
+ 2062 011d 34       		.uleb128 0x34
+ 2063 011e 00       		.byte	0
+ 2064 011f 03       		.uleb128 0x3
+ 2065 0120 0E       		.uleb128 0xe
+ 2066 0121 3A       		.uleb128 0x3a
+ 2067 0122 0B       		.uleb128 0xb
+ 2068 0123 3B       		.uleb128 0x3b
+ 2069 0124 0B       		.uleb128 0xb
+ 2070 0125 49       		.uleb128 0x49
+ 2071 0126 13       		.uleb128 0x13
+ 2072 0127 3F       		.uleb128 0x3f
+ 2073 0128 19       		.uleb128 0x19
+ 2074 0129 02       		.uleb128 0x2
+ 2075 012a 18       		.uleb128 0x18
+ 2076 012b 00       		.byte	0
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 41
+
+
+ 2077 012c 00       		.byte	0
+ 2078 012d 17       		.uleb128 0x17
+ 2079 012e 2E       		.uleb128 0x2e
+ 2080 012f 01       		.byte	0x1
+ 2081 0130 3F       		.uleb128 0x3f
+ 2082 0131 19       		.uleb128 0x19
+ 2083 0132 03       		.uleb128 0x3
+ 2084 0133 0E       		.uleb128 0xe
+ 2085 0134 3A       		.uleb128 0x3a
+ 2086 0135 0B       		.uleb128 0xb
+ 2087 0136 3B       		.uleb128 0x3b
+ 2088 0137 05       		.uleb128 0x5
+ 2089 0138 27       		.uleb128 0x27
+ 2090 0139 19       		.uleb128 0x19
+ 2091 013a 49       		.uleb128 0x49
+ 2092 013b 13       		.uleb128 0x13
+ 2093 013c 3C       		.uleb128 0x3c
+ 2094 013d 19       		.uleb128 0x19
+ 2095 013e 01       		.uleb128 0x1
+ 2096 013f 13       		.uleb128 0x13
+ 2097 0140 00       		.byte	0
+ 2098 0141 00       		.byte	0
+ 2099 0142 18       		.uleb128 0x18
+ 2100 0143 05       		.uleb128 0x5
+ 2101 0144 00       		.byte	0
+ 2102 0145 49       		.uleb128 0x49
+ 2103 0146 13       		.uleb128 0x13
+ 2104 0147 00       		.byte	0
+ 2105 0148 00       		.byte	0
+ 2106 0149 19       		.uleb128 0x19
+ 2107 014a 2E       		.uleb128 0x2e
+ 2108 014b 01       		.byte	0x1
+ 2109 014c 3F       		.uleb128 0x3f
+ 2110 014d 19       		.uleb128 0x19
+ 2111 014e 03       		.uleb128 0x3
+ 2112 014f 0E       		.uleb128 0xe
+ 2113 0150 3A       		.uleb128 0x3a
+ 2114 0151 0B       		.uleb128 0xb
+ 2115 0152 3B       		.uleb128 0x3b
+ 2116 0153 05       		.uleb128 0x5
+ 2117 0154 27       		.uleb128 0x27
+ 2118 0155 19       		.uleb128 0x19
+ 2119 0156 3C       		.uleb128 0x3c
+ 2120 0157 19       		.uleb128 0x19
+ 2121 0158 01       		.uleb128 0x1
+ 2122 0159 13       		.uleb128 0x13
+ 2123 015a 00       		.byte	0
+ 2124 015b 00       		.byte	0
+ 2125 015c 1A       		.uleb128 0x1a
+ 2126 015d 26       		.uleb128 0x26
+ 2127 015e 00       		.byte	0
+ 2128 015f 49       		.uleb128 0x49
+ 2129 0160 13       		.uleb128 0x13
+ 2130 0161 00       		.byte	0
+ 2131 0162 00       		.byte	0
+ 2132 0163 1B       		.uleb128 0x1b
+ 2133 0164 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 42
+
+
+ 2134 0165 01       		.byte	0x1
+ 2135 0166 3F       		.uleb128 0x3f
+ 2136 0167 19       		.uleb128 0x19
+ 2137 0168 03       		.uleb128 0x3
+ 2138 0169 0E       		.uleb128 0xe
+ 2139 016a 3A       		.uleb128 0x3a
+ 2140 016b 0B       		.uleb128 0xb
+ 2141 016c 3B       		.uleb128 0x3b
+ 2142 016d 0B       		.uleb128 0xb
+ 2143 016e 27       		.uleb128 0x27
+ 2144 016f 19       		.uleb128 0x19
+ 2145 0170 3C       		.uleb128 0x3c
+ 2146 0171 19       		.uleb128 0x19
+ 2147 0172 01       		.uleb128 0x1
+ 2148 0173 13       		.uleb128 0x13
+ 2149 0174 00       		.byte	0
+ 2150 0175 00       		.byte	0
+ 2151 0176 1C       		.uleb128 0x1c
+ 2152 0177 2E       		.uleb128 0x2e
+ 2153 0178 00       		.byte	0
+ 2154 0179 3F       		.uleb128 0x3f
+ 2155 017a 19       		.uleb128 0x19
+ 2156 017b 03       		.uleb128 0x3
+ 2157 017c 0E       		.uleb128 0xe
+ 2158 017d 3A       		.uleb128 0x3a
+ 2159 017e 0B       		.uleb128 0xb
+ 2160 017f 3B       		.uleb128 0x3b
+ 2161 0180 0B       		.uleb128 0xb
+ 2162 0181 27       		.uleb128 0x27
+ 2163 0182 19       		.uleb128 0x19
+ 2164 0183 49       		.uleb128 0x49
+ 2165 0184 13       		.uleb128 0x13
+ 2166 0185 3C       		.uleb128 0x3c
+ 2167 0186 19       		.uleb128 0x19
+ 2168 0187 00       		.byte	0
+ 2169 0188 00       		.byte	0
+ 2170 0189 1D       		.uleb128 0x1d
+ 2171 018a 2E       		.uleb128 0x2e
+ 2172 018b 00       		.byte	0
+ 2173 018c 3F       		.uleb128 0x3f
+ 2174 018d 19       		.uleb128 0x19
+ 2175 018e 03       		.uleb128 0x3
+ 2176 018f 0E       		.uleb128 0xe
+ 2177 0190 3A       		.uleb128 0x3a
+ 2178 0191 0B       		.uleb128 0xb
+ 2179 0192 3B       		.uleb128 0x3b
+ 2180 0193 05       		.uleb128 0x5
+ 2181 0194 27       		.uleb128 0x27
+ 2182 0195 19       		.uleb128 0x19
+ 2183 0196 49       		.uleb128 0x49
+ 2184 0197 13       		.uleb128 0x13
+ 2185 0198 3C       		.uleb128 0x3c
+ 2186 0199 19       		.uleb128 0x19
+ 2187 019a 00       		.byte	0
+ 2188 019b 00       		.byte	0
+ 2189 019c 1E       		.uleb128 0x1e
+ 2190 019d 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 43
+
+
+ 2191 019e 00       		.byte	0
+ 2192 019f 3F       		.uleb128 0x3f
+ 2193 01a0 19       		.uleb128 0x19
+ 2194 01a1 03       		.uleb128 0x3
+ 2195 01a2 0E       		.uleb128 0xe
+ 2196 01a3 3A       		.uleb128 0x3a
+ 2197 01a4 0B       		.uleb128 0xb
+ 2198 01a5 3B       		.uleb128 0x3b
+ 2199 01a6 0B       		.uleb128 0xb
+ 2200 01a7 27       		.uleb128 0x27
+ 2201 01a8 19       		.uleb128 0x19
+ 2202 01a9 3C       		.uleb128 0x3c
+ 2203 01aa 19       		.uleb128 0x19
+ 2204 01ab 00       		.byte	0
+ 2205 01ac 00       		.byte	0
+ 2206 01ad 1F       		.uleb128 0x1f
+ 2207 01ae 2E       		.uleb128 0x2e
+ 2208 01af 01       		.byte	0x1
+ 2209 01b0 3F       		.uleb128 0x3f
+ 2210 01b1 19       		.uleb128 0x19
+ 2211 01b2 03       		.uleb128 0x3
+ 2212 01b3 0E       		.uleb128 0xe
+ 2213 01b4 3A       		.uleb128 0x3a
+ 2214 01b5 0B       		.uleb128 0xb
+ 2215 01b6 3B       		.uleb128 0x3b
+ 2216 01b7 0B       		.uleb128 0xb
+ 2217 01b8 27       		.uleb128 0x27
+ 2218 01b9 19       		.uleb128 0x19
+ 2219 01ba 49       		.uleb128 0x49
+ 2220 01bb 13       		.uleb128 0x13
+ 2221 01bc 3C       		.uleb128 0x3c
+ 2222 01bd 19       		.uleb128 0x19
+ 2223 01be 01       		.uleb128 0x1
+ 2224 01bf 13       		.uleb128 0x13
+ 2225 01c0 00       		.byte	0
+ 2226 01c1 00       		.byte	0
+ 2227 01c2 00       		.byte	0
+ 2228              		.section	.debug_loc,"",%progbits
+ 2229              	.Ldebug_loc0:
+ 2230              	.LLST0:
+ 2231 0000 54010000 		.4byte	.LVL49
+ 2232 0004 58010000 		.4byte	.LVL50
+ 2233 0008 0200     		.2byte	0x2
+ 2234 000a 30       		.byte	0x30
+ 2235 000b 9F       		.byte	0x9f
+ 2236 000c 58010000 		.4byte	.LVL50
+ 2237 0010 86010000 		.4byte	.LVL58
+ 2238 0014 0100     		.2byte	0x1
+ 2239 0016 57       		.byte	0x57
+ 2240 0017 00000000 		.4byte	0
+ 2241 001b 00000000 		.4byte	0
+ 2242              	.LLST1:
+ 2243 001f 58010000 		.4byte	.LVL50
+ 2244 0023 74010000 		.4byte	.LVL55
+ 2245 0027 0100     		.2byte	0x1
+ 2246 0029 54       		.byte	0x54
+ 2247 002a 76010000 		.4byte	.LVL56
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 44
+
+
+ 2248 002e 7C010000 		.4byte	.LVL57
+ 2249 0032 0100     		.2byte	0x1
+ 2250 0034 54       		.byte	0x54
+ 2251 0035 00000000 		.4byte	0
+ 2252 0039 00000000 		.4byte	0
+ 2253              	.LLST2:
+ 2254 003d 58010000 		.4byte	.LVL50
+ 2255 0041 6A010000 		.4byte	.LVL52
+ 2256 0045 0100     		.2byte	0x1
+ 2257 0047 53       		.byte	0x53
+ 2258 0048 6C010000 		.4byte	.LVL53
+ 2259 004c 74010000 		.4byte	.LVL55
+ 2260 0050 0100     		.2byte	0x1
+ 2261 0052 53       		.byte	0x53
+ 2262 0053 00000000 		.4byte	0
+ 2263 0057 00000000 		.4byte	0
+ 2264              		.section	.debug_aranges,"",%progbits
+ 2265 0000 2C000000 		.4byte	0x2c
+ 2266 0004 0200     		.2byte	0x2
+ 2267 0006 00000000 		.4byte	.Ldebug_info0
+ 2268 000a 04       		.byte	0x4
+ 2269 000b 00       		.byte	0
+ 2270 000c 0000     		.2byte	0
+ 2271 000e 0000     		.2byte	0
+ 2272 0010 00000000 		.4byte	.LFB63
+ 2273 0014 60000000 		.4byte	.LFE63-.LFB63
+ 2274 0018 00000000 		.4byte	.LFB64
+ 2275 001c 64000000 		.4byte	.LFE64-.LFB64
+ 2276 0020 00000000 		.4byte	.LFB65
+ 2277 0024 F4010000 		.4byte	.LFE65-.LFB65
+ 2278 0028 00000000 		.4byte	0
+ 2279 002c 00000000 		.4byte	0
+ 2280              		.section	.debug_ranges,"",%progbits
+ 2281              	.Ldebug_ranges0:
+ 2282 0000 00000000 		.4byte	.LFB63
+ 2283 0004 60000000 		.4byte	.LFE63
+ 2284 0008 00000000 		.4byte	.LFB64
+ 2285 000c 64000000 		.4byte	.LFE64
+ 2286 0010 00000000 		.4byte	.LFB65
+ 2287 0014 F4010000 		.4byte	.LFE65
+ 2288 0018 00000000 		.4byte	0
+ 2289 001c 00000000 		.4byte	0
+ 2290              		.section	.debug_line,"",%progbits
+ 2291              	.Ldebug_line0:
+ 2292 0000 88020000 		.section	.debug_str,"MS",%progbits,1
+ 2292      0200D701 
+ 2292      00000201 
+ 2292      FB0E0D00 
+ 2292      01010101 
+ 2293              	.LASF50:
+ 2294 0000 4379446D 		.ascii	"CyDmaTdAllocate\000"
+ 2294      61546441 
+ 2294      6C6C6F63 
+ 2294      61746500 
+ 2295              	.LASF41:
+ 2296 0010 41444349 		.ascii	"ADCInt2_StartEx\000"
+ 2296      6E74325F 
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 45
+
+
+ 2296      53746172 
+ 2296      74457800 
+ 2297              	.LASF33:
+ 2298 0020 706F7432 		.ascii	"pot2Value\000"
+ 2298      56616C75 
+ 2298      6500
+ 2299              	.LASF42:
+ 2300 002a 4144435F 		.ascii	"ADC_SAR_1_Start\000"
+ 2300      5341525F 
+ 2300      315F5374 
+ 2300      61727400 
+ 2301              	.LASF49:
+ 2302 003a 41444344 		.ascii	"ADCDMA1_DmaInitialize\000"
+ 2302      4D41315F 
+ 2302      446D6149 
+ 2302      6E697469 
+ 2302      616C697A 
+ 2303              	.LASF2:
+ 2304 0050 73686F72 		.ascii	"short int\000"
+ 2304      7420696E 
+ 2304      7400
+ 2305              	.LASF26:
+ 2306 005a 444D415F 		.ascii	"DMA_1_TD\000"
+ 2306      315F5444 
+ 2306      00
+ 2307              	.LASF51:
+ 2308 0063 4379446D 		.ascii	"CyDmaTdSetConfiguration\000"
+ 2308      61546453 
+ 2308      6574436F 
+ 2308      6E666967 
+ 2308      75726174 
+ 2309              	.LASF54:
+ 2310 007b 4379446D 		.ascii	"CyDmaChEnable\000"
+ 2310      61436845 
+ 2310      6E61626C 
+ 2310      6500
+ 2311              	.LASF21:
+ 2312 0089 73697A65 		.ascii	"sizetype\000"
+ 2312      74797065 
+ 2312      00
+ 2313              	.LASF47:
+ 2314 0092 4144435F 		.ascii	"ADC_DelSig_Start\000"
+ 2314      44656C53 
+ 2314      69675F53 
+ 2314      74617274 
+ 2314      00
+ 2315              	.LASF27:
+ 2316 00a3 41444344 		.ascii	"ADCDMA2_TD\000"
+ 2316      4D41325F 
+ 2316      544400
+ 2317              	.LASF62:
+ 2318 00ae 6D61696E 		.ascii	"main\000"
+ 2318      00
+ 2319              	.LASF20:
+ 2320 00b3 63796973 		.ascii	"cyisraddress\000"
+ 2320      72616464 
+ 2320      72657373 
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 46
+
+
+ 2320      00
+ 2321              	.LASF53:
+ 2322 00c0 4379446D 		.ascii	"CyDmaChSetInitialTd\000"
+ 2322      61436853 
+ 2322      6574496E 
+ 2322      69746961 
+ 2322      6C546400 
+ 2323              	.LASF12:
+ 2324 00d4 75696E74 		.ascii	"uint16\000"
+ 2324      313600
+ 2325              	.LASF14:
+ 2326 00db 696E7431 		.ascii	"int16\000"
+ 2326      3600
+ 2327              	.LASF31:
+ 2328 00e1 70726F62 		.ascii	"probe2TXTD\000"
+ 2328      65325458 
+ 2328      544400
+ 2329              	.LASF15:
+ 2330 00ec 666C6F61 		.ascii	"float\000"
+ 2330      7400
+ 2331              	.LASF55:
+ 2332 00f2 41444344 		.ascii	"ADCDMA2_DmaInitialize\000"
+ 2332      4D41325F 
+ 2332      446D6149 
+ 2332      6E697469 
+ 2332      616C697A 
+ 2333              	.LASF6:
+ 2334 0108 6C6F6E67 		.ascii	"long long int\000"
+ 2334      206C6F6E 
+ 2334      6720696E 
+ 2334      7400
+ 2335              	.LASF24:
+ 2336 0116 444D415F 		.ascii	"DMA_1_Chan\000"
+ 2336      315F4368 
+ 2336      616E00
+ 2337              	.LASF35:
+ 2338 0121 706F7453 		.ascii	"potSelect_Select\000"
+ 2338      656C6563 
+ 2338      745F5365 
+ 2338      6C656374 
+ 2338      00
+ 2339              	.LASF4:
+ 2340 0132 6C6F6E67 		.ascii	"long int\000"
+ 2340      20696E74 
+ 2340      00
+ 2341              	.LASF48:
+ 2342 013b 55534246 		.ascii	"USBFS_GetEPState\000"
+ 2342      535F4765 
+ 2342      74455053 
+ 2342      74617465 
+ 2342      00
+ 2343              	.LASF29:
+ 2344 014c 736F7572 		.ascii	"source\000"
+ 2344      636500
+ 2345              	.LASF38:
+ 2346 0153 55534246 		.ascii	"USBFS_GetConfiguration\000"
+ 2346      535F4765 
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 47
+
+
+ 2346      74436F6E 
+ 2346      66696775 
+ 2346      72617469 
+ 2347              	.LASF1:
+ 2348 016a 756E7369 		.ascii	"unsigned char\000"
+ 2348      676E6564 
+ 2348      20636861 
+ 2348      7200
+ 2349              	.LASF56:
+ 2350 0178 55534246 		.ascii	"USBFS_ReadOutEP\000"
+ 2350      535F5265 
+ 2350      61644F75 
+ 2350      74455000 
+ 2351              	.LASF61:
+ 2352 0188 433A5C55 		.ascii	"C:\\Users\\Nelson\\Desktop\\121 labs\\CMPE121 Lab P"
+ 2352      73657273 
+ 2352      5C4E656C 
+ 2352      736F6E5C 
+ 2352      4465736B 
+ 2353 01b6 726F6A65 		.ascii	"roject\\Oscilloscope\\PSOC\\Oscilliscope.cydsn\000"
+ 2353      63745C4F 
+ 2353      7363696C 
+ 2353      6C6F7363 
+ 2353      6F70655C 
+ 2354              	.LASF45:
+ 2355 01e2 4144435F 		.ascii	"ADC_SAR_2_StartConvert\000"
+ 2355      5341525F 
+ 2355      325F5374 
+ 2355      61727443 
+ 2355      6F6E7665 
+ 2356              	.LASF0:
+ 2357 01f9 7369676E 		.ascii	"signed char\000"
+ 2357      65642063 
+ 2357      68617200 
+ 2358              	.LASF7:
+ 2359 0205 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2359      206C6F6E 
+ 2359      6720756E 
+ 2359      7369676E 
+ 2359      65642069 
+ 2360              	.LASF8:
+ 2361 021c 756E7369 		.ascii	"unsigned int\000"
+ 2361      676E6564 
+ 2361      20696E74 
+ 2361      00
+ 2362              	.LASF52:
+ 2363 0229 4379446D 		.ascii	"CyDmaTdSetAddress\000"
+ 2363      61546453 
+ 2363      65744164 
+ 2363      64726573 
+ 2363      7300
+ 2364              	.LASF57:
+ 2365 023b 4379446D 		.ascii	"CyDmaChDisable\000"
+ 2365      61436844 
+ 2365      69736162 
+ 2365      6C6500
+ 2366              	.LASF44:
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 48
+
+
+ 2367 024a 4144435F 		.ascii	"ADC_SAR_2_Start\000"
+ 2367      5341525F 
+ 2367      325F5374 
+ 2367      61727400 
+ 2368              	.LASF3:
+ 2369 025a 73686F72 		.ascii	"short unsigned int\000"
+ 2369      7420756E 
+ 2369      7369676E 
+ 2369      65642069 
+ 2369      6E7400
+ 2370              	.LASF17:
+ 2371 026d 63686172 		.ascii	"char\000"
+ 2371      00
+ 2372              	.LASF18:
+ 2373 0272 63797374 		.ascii	"cystatus\000"
+ 2373      61747573 
+ 2373      00
+ 2374              	.LASF43:
+ 2375 027b 4144435F 		.ascii	"ADC_SAR_1_StartConvert\000"
+ 2375      5341525F 
+ 2375      315F5374 
+ 2375      61727443 
+ 2375      6F6E7665 
+ 2376              	.LASF10:
+ 2377 0292 696E7433 		.ascii	"int32_t\000"
+ 2377      325F7400 
+ 2378              	.LASF25:
+ 2379 029a 41444344 		.ascii	"ADCDMA2_Chan\000"
+ 2379      4D41325F 
+ 2379      4368616E 
+ 2379      00
+ 2380              	.LASF11:
+ 2381 02a7 75696E74 		.ascii	"uint8\000"
+ 2381      3800
+ 2382              	.LASF13:
+ 2383 02ad 75696E74 		.ascii	"uint32\000"
+ 2383      333200
+ 2384              	.LASF60:
+ 2385 02b4 6D61696E 		.ascii	"main.c\000"
+ 2385      2E6300
+ 2386              	.LASF19:
+ 2387 02bb 72656738 		.ascii	"reg8\000"
+ 2387      00
+ 2388              	.LASF5:
+ 2389 02c0 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2389      20756E73 
+ 2389      69676E65 
+ 2389      6420696E 
+ 2389      7400
+ 2390              	.LASF16:
+ 2391 02d2 646F7562 		.ascii	"double\000"
+ 2391      6C6500
+ 2392              	.LASF39:
+ 2393 02d9 55534246 		.ascii	"USBFS_EnableOutEP\000"
+ 2393      535F456E 
+ 2393      61626C65 
+ 2393      4F757445 
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 49
+
+
+ 2393      5000
+ 2394              	.LASF37:
+ 2395 02eb 4144435F 		.ascii	"ADC_DelSig_Read16\000"
+ 2395      44656C53 
+ 2395      69675F52 
+ 2395      65616431 
+ 2395      3600
+ 2396              	.LASF34:
+ 2397 02fd 55534246 		.ascii	"USBFS_LoadInEP\000"
+ 2397      535F4C6F 
+ 2397      6164496E 
+ 2397      455000
+ 2398              	.LASF32:
+ 2399 030c 706F7431 		.ascii	"pot1Value\000"
+ 2399      56616C75 
+ 2399      6500
+ 2400              	.LASF9:
+ 2401 0316 5F5F696E 		.ascii	"__int32_t\000"
+ 2401      7433325F 
+ 2401      7400
+ 2402              	.LASF59:
+ 2403 0320 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 2403      4320342E 
+ 2403      392E3320 
+ 2403      32303135 
+ 2403      30333033 
+ 2404 0353 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m3 -mthumb -g -O"
+ 2404      20726576 
+ 2404      6973696F 
+ 2404      6E203232 
+ 2404      31323230 
+ 2405 0386 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2405      66756E63 
+ 2405      74696F6E 
+ 2405      2D736563 
+ 2405      74696F6E 
+ 2406              	.LASF46:
+ 2407 03ae 706F7453 		.ascii	"potSelect_Start\000"
+ 2407      656C6563 
+ 2407      745F5374 
+ 2407      61727400 
+ 2408              	.LASF58:
+ 2409 03be 55534246 		.ascii	"USBFS_IsConfigurationChanged\000"
+ 2409      535F4973 
+ 2409      436F6E66 
+ 2409      69677572 
+ 2409      6174696F 
+ 2410              	.LASF22:
+ 2411 03db 41444344 		.ascii	"ADCDMAISR1\000"
+ 2411      4D414953 
+ 2411      523100
+ 2412              	.LASF23:
+ 2413 03e6 41444344 		.ascii	"ADCDMAISR2\000"
+ 2413      4D414953 
+ 2413      523200
+ 2414              	.LASF30:
+ 2415 03f1 70726F62 		.ascii	"probe1TXTD\000"
+ARM GAS  C:\Users\Nelson\AppData\Local\Temp\ccnnK959.s 			page 50
+
+
+ 2415      65315458 
+ 2415      544400
+ 2416              	.LASF36:
+ 2417 03fc 55534246 		.ascii	"USBFS_Start\000"
+ 2417      535F5374 
+ 2417      61727400 
+ 2418              	.LASF28:
+ 2419 0408 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 2419      52784275 
+ 2419      66666572 
+ 2419      00
+ 2420              	.LASF40:
+ 2421 0415 41444349 		.ascii	"ADCInt1_StartEx\000"
+ 2421      6E74315F 
+ 2421      53746172 
+ 2421      74457800 
+ 2422              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br

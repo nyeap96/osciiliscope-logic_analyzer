@@ -1,0 +1,37 @@
+dont_use_io iocell 1 0
+dont_use_io iocell 1 1
+dont_use_io iocell 1 3
+set_location "__ONE__" macrocell 1 3 0 0
+set_location "\USBFS:bus_reset\" interrupt -1 -1 23
+set_location "\ADC_SAR_2:ADC_SAR\" sarcell -1 -1 1
+set_location "ADCInt2" interrupt -1 -1 1
+set_location "ADCInt1" interrupt -1 -1 0
+set_location "\ADC_DelSig:DSM\" dsmodcell -1 -1 0
+set_location "\ADC_SAR_2:IRQ\" interrupt -1 -1 3
+set_location "\ADC_SAR_1:IRQ\" interrupt -1 -1 2
+set_location "ADCDMA2" drqcell -1 -1 1
+set_location "ADCDMA1" drqcell -1 -1 0
+set_location "ClockBlock" clockblockcell -1 -1 0
+set_location "\USBFS:arb_int\" interrupt -1 -1 22
+# Note: port 15 is the logical name for port 8
+set_io "\USBFS:Dp(0)\" iocell 15 6
+set_location "\ADC_SAR_1:ADC_SAR\" sarcell -1 -1 0
+set_location "\USBFS:Dp\" logicalport -1 -1 8
+set_location "\USBFS:ep_1\" interrupt -1 -1 4
+set_location "\USBFS:ep_2\" interrupt -1 -1 5
+set_location "\USBFS:ep_5\" interrupt -1 -1 8
+set_location "\USBFS:ep_0\" interrupt -1 -1 24
+set_location "\USBFS:ep_3\" interrupt -1 -1 6
+set_location "\USBFS:ep_4\" interrupt -1 -1 7
+set_location "\USBFS:dp_int\" interrupt -1 -1 12
+set_location "\ADC_DelSig:IRQ\" interrupt -1 -1 29
+set_io "probe1(0)" iocell 3 0
+set_io "probe2(0)" iocell 3 1
+# Note: port 15 is the logical name for port 8
+set_io "\USBFS:Dm(0)\" iocell 15 7
+set_io "\ADC_SAR_1:Bypass(0)\" iocell 0 4
+set_io "potChannel1(0)" iocell 2 3
+set_io "\ADC_SAR_2:Bypass(0)\" iocell 0 2
+set_io "potChannel2(0)" iocell 2 6
+set_location "\ADC_DelSig:DEC\" decimatorcell -1 -1 0
+set_location "\USBFS:USB\" usbcell -1 -1 0
